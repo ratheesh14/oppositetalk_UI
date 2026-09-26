@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { useAuthStore } from '@/store/useAuthStore';
+import { signInWithGoogleReal } from '@/lib/supabaseClient';
 import {
   ShieldCheck,
   HeartHandshake,
@@ -200,7 +201,7 @@ function LandingPageContent() {
 
             {/* Primary Google Auth Button */}
             <button
-              onClick={() => setFlowStep('select_account')}
+              onClick={() => signInWithGoogleReal()}
               className="w-full flex items-center justify-center gap-3 bg-white hover:bg-purple-50 text-slate-900 font-bold py-4 px-6 rounded-2xl transition-all duration-300 shadow-[0_0_25px_rgba(255,255,255,0.25)] hover:shadow-[0_0_35px_rgba(232,121,249,0.5)] border border-purple-200 active:scale-[0.98] group cursor-pointer"
             >
               <svg className="w-5 h-5 shrink-0 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
