@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useEligibilityStore } from '@/store/useEligibilityStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Button } from '@/components/ui/Button';
-import { CheckCircle2, ShieldAlert, ArrowRight, Home, HeartHandshake } from 'lucide-react';
+import { CheckCircle2, ArrowRight, Home, HeartHandshake } from 'lucide-react';
 
 export default function EligibilityResultPage() {
   const result = useEligibilityStore((s) => s.result);
@@ -59,36 +59,16 @@ export default function EligibilityResultPage() {
             </span>
 
             {/* Main Message requested by user */}
-            <h1 className="font-serif text-2xl sm:text-3xl font-bold text-white mt-4 leading-tight">
+            <h1 className="font-serif text-2xl sm:text-3xl font-bold text-white mt-5 leading-tight">
               You are not ready for the marriage
             </h1>
 
             {/* Sub-message requested by user */}
-            <p className="text-fuchsia-300 font-medium text-base sm:text-lg mt-2">
+            <p className="text-fuchsia-300 font-medium text-base sm:text-lg mt-3">
               Will See you soon
             </p>
 
-            {/* Explanation box */}
-            <div className="mt-6 rounded-2xl bg-purple-950/80 p-5 text-left border border-purple-700/60 shadow-inner">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-purple-300 mb-2 flex items-center gap-1.5">
-                <ShieldAlert className="w-3.5 h-3.5 text-fuchsia-400" />
-                Community Age Policy
-              </h4>
-              <p className="text-xs text-purple-200 leading-relaxed">
-                OppositeTalk is exclusively dedicated to marriage-focused commitments for <strong>Males above 26</strong> (27+) and <strong>Females above 24</strong> (25+).
-              </p>
-              {result?.reasons && result.reasons.length > 0 && (
-                <ul className="mt-3 space-y-1.5 border-t border-purple-800/50 pt-2.5">
-                  {result.reasons.map((reason, idx) => (
-                    <li key={idx} className="text-[11px] text-purple-300/90 leading-normal">
-                      • {reason}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-
-            <div className="mt-8 pt-4 border-t border-purple-900/60">
+            <div className="mt-8 pt-6 border-t border-purple-900/60">
               <Link href="/">
                 <Button variant="neon" size="md" className="w-full font-bold text-xs py-3.5">
                   <Home className="w-4 h-4 mr-2" /> Return to Homepage
