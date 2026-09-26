@@ -2,27 +2,35 @@ import React, { ButtonHTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive' | 'neon';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', size = 'md', isLoading, children, disabled, ...props }, ref) => {
-    const baseStyles = 'inline-flex items-center justify-center font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-[0.98]';
+    const baseStyles =
+      'inline-flex items-center justify-center font-medium rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-[0.98] relative overflow-hidden';
 
     const variants = {
-      primary: 'bg-[#1e293b] text-white hover:bg-[#0f172a] focus:ring-[#1e293b] shadow-md hover:shadow-lg',
-      secondary: 'bg-[#e2e8f0] text-[#0f172a] hover:bg-[#cbd5e1] focus:ring-[#94a3b8]',
-      outline: 'border border-[#cbd5e1] bg-transparent text-[#0f172a] hover:bg-[#f8fafc] focus:ring-[#94a3b8]',
-      ghost: 'bg-transparent text-[#334155] hover:bg-[#f1f5f9] hover:text-[#0f172a]',
-      destructive: 'bg-[#ef4444] text-white hover:bg-[#dc2626] focus:ring-[#ef4444]',
+      primary:
+        'bg-gradient-to-r from-purple-700 via-violet-600 to-fuchsia-600 text-white hover:from-purple-600 hover:via-violet-500 hover:to-fuchsia-500 shadow-lg shadow-purple-900/40 hover:shadow-purple-600/50 border border-purple-400/30',
+      neon:
+        'bg-fuchsia-600 text-white hover:bg-fuchsia-500 shadow-[0_0_20px_rgba(217,70,239,0.5)] border border-fuchsia-300/40 font-bold',
+      secondary:
+        'bg-purple-950/80 text-purple-200 border border-purple-800/60 hover:bg-purple-900/90 hover:text-white hover:border-purple-600',
+      outline:
+        'border border-purple-500/40 bg-purple-950/20 text-purple-200 hover:bg-purple-900/40 hover:border-purple-400 hover:text-white',
+      ghost:
+        'bg-transparent text-purple-300 hover:bg-purple-950/50 hover:text-white',
+      destructive:
+        'bg-rose-600 text-white hover:bg-rose-500 focus:ring-rose-500 shadow-md',
     };
 
     const sizes = {
       sm: 'px-3 py-1.5 text-xs',
       md: 'px-4 py-2 text-sm',
-      lg: 'px-6 py-3 text-base font-semibold',
+      lg: 'px-6 py-3.5 text-base font-semibold',
     };
 
     return (

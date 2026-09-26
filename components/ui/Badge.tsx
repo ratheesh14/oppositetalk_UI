@@ -2,22 +2,29 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 interface BadgeProps {
-  variant?: 'default' | 'success' | 'warning' | 'info' | 'outline';
+  variant?: 'default' | 'success' | 'warning' | 'info' | 'outline' | 'purple';
   children: React.ReactNode;
   className?: string;
 }
 
-export const Badge: React.FC<BadgeProps> = ({ variant = 'default', children, className }) => {
+export const Badge: React.FC<BadgeProps> = ({ variant = 'purple', children, className }) => {
   const variants = {
-    default: 'bg-slate-100 text-slate-800 border-slate-200',
-    success: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-    warning: 'bg-amber-50 text-amber-700 border-amber-200',
-    info: 'bg-sky-50 text-sky-700 border-sky-200',
-    outline: 'bg-transparent text-slate-700 border-slate-300',
+    purple: 'bg-purple-950/80 text-purple-300 border-purple-800/80 shadow-[0_0_10px_rgba(168,85,247,0.15)]',
+    default: 'bg-slate-900 text-slate-200 border-slate-700',
+    success: 'bg-emerald-950/80 text-emerald-300 border-emerald-800/80',
+    warning: 'bg-amber-950/80 text-amber-300 border-amber-800/80',
+    info: 'bg-fuchsia-950/80 text-fuchsia-300 border-fuchsia-800/80',
+    outline: 'bg-transparent text-purple-200 border-purple-500/40',
   };
 
   return (
-    <span className={cn('inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border', variants[variant], className)}>
+    <span
+      className={cn(
+        'inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border backdrop-blur-md tracking-wide',
+        variants[variant],
+        className
+      )}
+    >
       {children}
     </span>
   );
