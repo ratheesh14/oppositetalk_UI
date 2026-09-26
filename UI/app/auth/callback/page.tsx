@@ -15,9 +15,13 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 
+import { checkStrictAgeGenderEligibility } from '@/lib/eligibilityRules';
+import { useEligibilityStore } from '@/store/useEligibilityStore';
+
 function AuthCallbackContent() {
   const router = useRouter();
   const setAuth = useAuthStore((s) => s.setAuth);
+  const setEligibilityResult = useEligibilityStore((s) => s.setResult);
 
   const [loading, setLoading] = useState(true);
   const [googleUserEmail, setGoogleUserEmail] = useState('');
@@ -114,8 +118,45 @@ function AuthCallbackContent() {
       return;
     }
 
-    if (numAge < 18) {
-      setFormError('OppositeTalk is exclusively for consenting adults age 18 and older.');
+    // STRICT AGE & GENDER ELIGIBILITY CHECK (Male > 26, Female > 24)
+    const eligibilityCheck = checkStrictAgeGenderEligibility(numAge, gender);
+    if (!eligibilityCheck.isEligible) {
+      setFormError(eligibilityCheck.reason!);
+
+      const nameParts = fullName.trim().split(' ');
+      const firstName = nameParts[0] || 'User';
+      const lastName = nameParts.slice(1).join(' ') || '';
+
+      const ineligibleUser = {
+        id: 'usr_' + Math.random().toString(36).substring(2, 9),
+        email: googleUserEmail || 'google.user@example.com',
+        firstName,
+        lastName,
+        age: numAge,
+        gender,
+        role: 'User' as const,
+        isEligible: false,
+        isProfileComplete: false,
+        verificationStatus: 'Rejected' as const,
+        avatarUrl: googleAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+        createdAt: new Date().toISOString(),
+      };
+
+      setEligibilityResult({
+        isEligible: false,
+        status: 'NotEligible',
+        reasons: [eligibilityCheck.reason!],
+        evaluatedAt: new Date().toISOString(),
+        assessmentVersion: 'v2.4-strict-age',
+      });
+
+      setAuth(ineligibleUser, 'jwt_real_google_oauth_' + Date.now());
+      setIsSubmitting(true);
+
+      setTimeout(() => {
+        setIsSubmitting(false);
+        router.push('/eligibility/result');
+      }, 1000);
       return;
     }
 

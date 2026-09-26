@@ -34,6 +34,9 @@ const STEP_TITLES = [
   'Review & Submit',
 ];
 
+import { checkStrictAgeGenderEligibility } from '@/lib/eligibilityRules';
+import { useEligibilityStore } from '@/store/useEligibilityStore';
+
 export default function ProfileWizardPage() {
   const router = useRouter();
   const { currentStep, draftProfile, setStep, updateDraft, nextStep, prevStep } = useProfileWizardStore();
@@ -42,6 +45,7 @@ export default function ProfileWizardPage() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [saveMessage, setSaveMessage] = useState(false);
+  const [eligibilityError, setEligibilityError] = useState('');
 
   // Sync user details from auth store on initial load if available
   React.useEffect(() => {
@@ -89,6 +93,31 @@ export default function ProfileWizardPage() {
         bio: generatedBio,
       },
     });
+  };
+
+  const handleNextStep = () => {
+    setEligibilityError('');
+    if (currentStep === 1) {
+      const age = draftProfile.basicInfo?.age || 0;
+      const gender = draftProfile.basicInfo?.gender || 'Male';
+      const check = checkStrictAgeGenderEligibility(age, gender);
+      if (!check.isEligible) {
+        setEligibilityError(check.reason!);
+        useEligibilityStore.getState().setResult({
+          isEligible: false,
+          status: 'NotEligible',
+          reasons: [check.reason!],
+          evaluatedAt: new Date().toISOString(),
+          assessmentVersion: 'v2.4-strict-age',
+        });
+        updateUser({ isEligible: false });
+        setTimeout(() => {
+          router.push('/eligibility/result');
+        }, 1200);
+        return;
+      }
+    }
+    nextStep();
   };
 
   const progressPercentage = (currentStep / TOTAL_PROFILE_STEPS) * 100;
@@ -146,6 +175,11 @@ export default function ProfileWizardPage() {
           {/* STEP 1: Basic Information */}
           {currentStep === 1 && (
             <div className="space-y-5">
+              {eligibilityError && (
+                <div className="p-4 rounded-2xl bg-rose-950/90 border border-rose-500/50 text-xs text-rose-200 font-semibold animate-in fade-in">
+                  ⚠️ {eligibilityError} Redirecting to status notice...
+                </div>
+              )}
               <div>
                 <label className="block text-xs font-bold text-purple-200 mb-1.5 flex items-center gap-1.5">
                   <User className="w-3.5 h-3.5 text-fuchsia-400" />
@@ -396,7 +430,7 @@ export default function ProfileWizardPage() {
             <Button
               size="md"
               variant="neon"
-              onClick={nextStep}
+              onClick={handleNextStep}
               className="font-bold px-8 py-3"
             >
               Next Step <ArrowRight className="w-4 h-4 ml-1" />
