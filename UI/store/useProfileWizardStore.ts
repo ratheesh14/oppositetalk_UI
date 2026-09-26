@@ -17,11 +17,11 @@ export const useProfileWizardStore = create<ProfileWizardState>((set) => ({
   currentStep: 1,
   draftProfile: {
     basicInfo: {
-      displayName: 'Alex Morgan',
-      age: 29,
+      displayName: '',
+      age: 28,
       gender: 'Male',
       location: 'Chicago, IL',
-      bio: 'Focused on personal development, career stability, and finding a partner to build a meaningful future and family with.',
+      bio: '',
     },
     education: {
       degreeLevel: "Master's Degree",

@@ -131,6 +131,8 @@ function AuthCallbackContent() {
         email: googleUserEmail || 'google.user@example.com',
         firstName,
         lastName,
+        age: numAge,
+        gender,
         role: 'User' as const,
         isEligible: true,
         isProfileComplete: false,

@@ -37,10 +37,59 @@ const STEP_TITLES = [
 export default function ProfileWizardPage() {
   const router = useRouter();
   const { currentStep, draftProfile, setStep, updateDraft, nextStep, prevStep } = useProfileWizardStore();
+  const user = useAuthStore((s) => s.user);
   const updateUser = useAuthStore((s) => s.updateUser);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [saveMessage, setSaveMessage] = useState(false);
+
+  // Sync user details from auth store on initial load if available
+  React.useEffect(() => {
+    if (user) {
+      const userFullName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Ratheesh';
+      
+      const currentBasicInfo = draftProfile.basicInfo;
+      const needsNameUpdate = !currentBasicInfo?.displayName || currentBasicInfo.displayName === 'Alex Morgan';
+      const needsAgeUpdate = !currentBasicInfo?.age || currentBasicInfo.age === 28;
+      const needsBioUpdate = !currentBasicInfo?.bio;
+
+      if (needsNameUpdate || needsAgeUpdate || needsBioUpdate) {
+        updateDraft({
+          basicInfo: {
+            displayName: needsNameUpdate ? userFullName : (currentBasicInfo?.displayName || userFullName),
+            age: needsAgeUpdate && user.age ? user.age : (currentBasicInfo?.age || 29),
+            gender: currentBasicInfo?.gender || user.gender || 'Male',
+            location: currentBasicInfo?.location || 'Chicago, IL',
+            bio: currentBasicInfo?.bio || 'Focused on personal development, career stability, and finding a partner to build a meaningful future and family with.',
+          },
+        });
+      }
+    }
+  }, [user]);
+
+  const handleAutoGenerateBio = () => {
+    const name = draftProfile.basicInfo?.displayName || user?.firstName || 'Ratheesh';
+    const age = draftProfile.basicInfo?.age || user?.age || 29;
+    const profession = draftProfile.profession?.title || 'Senior Software Engineer';
+    const industry = draftProfile.profession?.industry || 'Technology';
+    const city = draftProfile.location?.city || draftProfile.basicInfo?.location || 'Chicago, IL';
+    const values = draftProfile.relationshipGoals?.primaryValues?.length 
+      ? draftProfile.relationshipGoals.primaryValues.join(', ')
+      : 'Integrity, Family, Personal Growth';
+    const timeline = draftProfile.relationshipGoals?.timelineToMarriage || '1-2 years';
+    const hobbies = draftProfile.interests?.hobbies?.length 
+      ? draftProfile.interests.hobbies.slice(0, 3).join(', ') 
+      : 'Reading, Hiking, Personal Finance';
+
+    const generatedBio = `Focused on personal development, career stability, and finding a partner to build a meaningful future and family with. As a ${age}-year-old ${profession} in ${industry} based in ${city}, I value ${values}. In my free time, I enjoy ${hobbies}. Looking to connect with an authentic partner aligned on building a long-term future together (${timeline}).`;
+
+    updateDraft({
+      basicInfo: {
+        ...draftProfile.basicInfo!,
+        bio: generatedBio,
+      },
+    });
+  };
 
   const progressPercentage = (currentStep / TOTAL_PROFILE_STEPS) * 100;
 
@@ -145,7 +194,17 @@ export default function ProfileWizardPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-purple-200 mb-1.5">About / Bio</label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-bold text-purple-200">About / Bio</label>
+                  <button
+                    type="button"
+                    onClick={handleAutoGenerateBio}
+                    className="text-[11px] font-semibold text-fuchsia-300 hover:text-white flex items-center gap-1.5 bg-fuchsia-950/80 border border-fuchsia-500/50 hover:bg-fuchsia-900/80 px-3 py-1 rounded-lg transition-all cursor-pointer shadow-[0_0_12px_rgba(217,70,239,0.3)]"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-fuchsia-400 animate-pulse" />
+                    Auto-Generate Bio with AI
+                  </button>
+                </div>
                 <textarea
                   rows={4}
                   value={draftProfile.basicInfo?.bio || ''}
@@ -153,8 +212,12 @@ export default function ProfileWizardPage() {
                     updateDraft({ basicInfo: { ...draftProfile.basicInfo!, bio: e.target.value } })
                   }
                   placeholder="Share a brief overview of your values, personal journey, and relationship goals..."
-                  className="w-full rounded-xl bg-purple-950/80 border border-purple-700/60 px-4 py-3 text-sm text-white placeholder-purple-400/50 focus:outline-none focus:ring-2 focus:ring-fuchsia-500 shadow-inner"
+                  className="w-full rounded-xl bg-purple-950/80 border border-purple-700/60 px-4 py-3 text-sm text-white placeholder-purple-400/50 focus:outline-none focus:ring-2 focus:ring-fuchsia-500 shadow-inner leading-relaxed"
                 />
+                <p className="text-[11px] text-purple-300/80 mt-1.5 flex items-center gap-1.5">
+                  <Sparkles className="w-3 h-3 text-fuchsia-400 shrink-0" />
+                  Your bio can be auto-generated based on the answers provided across your profile.
+                </p>
               </div>
             </div>
           )}

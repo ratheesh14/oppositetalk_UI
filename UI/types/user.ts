@@ -7,6 +7,8 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
+  age?: number;
+  gender?: string;
   role: UserRole;
   isEligible: boolean;
   isProfileComplete: boolean;
