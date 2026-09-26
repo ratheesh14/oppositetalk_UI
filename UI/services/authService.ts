@@ -11,14 +11,67 @@ export interface GoogleAuthPayload {
   gender?: string;
 }
 
+// Backend API returns ApiResponse<AuthResult> which wraps data differently
+// Backend shape: { success: bool, data: { user: UserDto, accessToken: string, refreshToken: string }, error: null, traceId: string }
+// Frontend expects: { user: User, tokens: { accessToken, refreshToken, expiresIn } }
+interface BackendAuthResult {
+  success: boolean;
+  data?: {
+    user: {
+      id: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      role: string;
+      isEligible: boolean;
+      isProfileComplete: boolean;
+      verificationStatus: string;
+      avatarUrl?: string;
+    };
+    accessToken: string;
+    refreshToken: string;
+  };
+  error?: { code: string; message: string };
+}
+
+function mapBackendToAuthResponse(result: BackendAuthResult): AuthResponse {
+  const d = result.data!;
+  return {
+    user: {
+      id: d.user.id,
+      email: d.user.email,
+      firstName: d.user.firstName,
+      lastName: d.user.lastName,
+      role: d.user.role as AuthResponse['user']['role'],
+      isEligible: d.user.isEligible,
+      isProfileComplete: d.user.isProfileComplete,
+      verificationStatus: d.user.verificationStatus as AuthResponse['user']['verificationStatus'],
+      avatarUrl: d.user.avatarUrl,
+      createdAt: new Date().toISOString(),
+    },
+    tokens: {
+      accessToken: d.accessToken,
+      refreshToken: d.refreshToken,
+      expiresIn: 3600,
+    },
+  };
+}
+
 export const authService = {
   async googleAuth(data: GoogleAuthPayload): Promise<AuthResponse> {
     try {
-      return await apiRequest<AuthResponse>('/auth/google', {
+      // Backend route is /api/v1/auth/google; apiClient base is /api, so use /v1/auth/google
+      const result = await apiRequest<BackendAuthResult>('/v1/auth/google', {
         method: 'POST',
         body: JSON.stringify(data),
       });
-    } catch {
+      if (result.success && result.data) {
+        return mapBackendToAuthResponse(result);
+      }
+      throw new Error(result.error?.message || 'Google auth failed');
+    } catch (err) {
+      console.warn('[authService.googleAuth] Backend API call failed:', err);
+      // Fallback mock — role defaults to User. Actual role comes from backend DB only.
       const mockUser: User = {
         id: `usr_${Date.now()}`,
         email: data.email,
@@ -45,10 +98,14 @@ export const authService = {
 
   async login(data: LoginFormData): Promise<AuthResponse> {
     try {
-      return await apiRequest<AuthResponse>('/auth/login', {
+      const result = await apiRequest<BackendAuthResult>('/v1/auth/login', {
         method: 'POST',
         body: JSON.stringify(data),
       });
+      if (result.success && result.data) {
+        return mapBackendToAuthResponse(result);
+      }
+      throw new Error(result.error?.message || 'Login failed');
     } catch {
       const mockUser: User = {
         id: 'user_123',
@@ -77,10 +134,15 @@ export const authService = {
 
   async register(data: RegisterFormData): Promise<{ user: User; requireVerification: boolean }> {
     try {
-      return await apiRequest<{ user: User; requireVerification: boolean }>('/auth/register', {
+      const result = await apiRequest<BackendAuthResult>('/v1/auth/register', {
         method: 'POST',
         body: JSON.stringify(data),
       });
+      if (result.success && result.data) {
+        const mapped = mapBackendToAuthResponse(result);
+        return { user: mapped.user, requireVerification: true };
+      }
+      throw new Error(result.error?.message || 'Registration failed');
     } catch {
       const mockUser: User = {
         id: `user_${Date.now()}`,
@@ -99,7 +161,7 @@ export const authService = {
 
   async verifyAccount(code: string): Promise<{ success: boolean; message: string }> {
     try {
-      return await apiRequest<{ success: boolean; message: string }>('/auth/verify', {
+      return await apiRequest<{ success: boolean; message: string }>('/v1/auth/verify', {
         method: 'POST',
         body: JSON.stringify({ code }),
       });
@@ -109,6 +171,6 @@ export const authService = {
   },
 
   async getCurrentUser(): Promise<User> {
-    return await apiRequest<User>('/auth/me');
+    return await apiRequest<User>('/v1/auth/me');
   },
 };
