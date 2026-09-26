@@ -78,7 +78,7 @@ export const authService = {
         firstName: data.firstName || 'User',
         lastName: data.lastName || '',
         role: 'User',
-        isEligible: true,
+        isEligible: false,
         isProfileComplete: false,
         verificationStatus: 'Pending',
         avatarUrl: data.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',

@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useEligibilityStore } from '@/store/useEligibilityStore';
+import { useAuthStore } from '@/store/useAuthStore';
 import { eligibilityService } from '@/services/eligibilityService';
 import { Button } from '@/components/ui/Button';
 import { ProgressBar } from '@/components/ui/ProgressBar';
@@ -69,6 +70,7 @@ export default function EligibilityPage() {
     try {
       const result = await eligibilityService.submitAssessment(answers);
       setResult(result);
+      useAuthStore.getState().updateUser({ isEligible: result.isEligible });
       router.push('/eligibility/result');
     } catch (err) {
       console.error(err);

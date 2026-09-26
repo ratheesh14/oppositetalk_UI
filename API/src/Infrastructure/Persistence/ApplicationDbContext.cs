@@ -30,6 +30,11 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
         base.OnModelCreating(modelBuilder);
         modelBuilder.HasPostgresExtension("vector");
 
+        // Unique constraint on User.Email to prevent duplicate registrations
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.Email)
+            .IsUnique();
+
         // Soft Delete Global Query Filters
         modelBuilder.Entity<User>().HasQueryFilter(u => !u.IsDeleted);
         modelBuilder.Entity<UserProfile>().HasQueryFilter(p => !p.IsDeleted);

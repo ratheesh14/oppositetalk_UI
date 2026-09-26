@@ -15,6 +15,12 @@ export default function EligibilityResultPage() {
   // Check eligibility from assessment result or user auth state
   const isEligible = result ? result.isEligible : (user ? user.isEligible : false);
 
+  React.useEffect(() => {
+    if (result) {
+      updateUser({ isEligible: result.isEligible });
+    }
+  }, [result, updateUser]);
+
   const handleCreateProfile = () => {
     updateUser({ isEligible: true });
   };

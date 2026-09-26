@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, Suspense } from 'react';
+import React, { useEffect, useState, useRef, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -38,7 +38,13 @@ function AuthCallbackContent() {
   const [formError, setFormError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const hasRun = useRef(false);
+
   useEffect(() => {
+    // Prevent duplicate execution from React Strict Mode / re-renders
+    if (hasRun.current) return;
+    hasRun.current = true;
+
     let mounted = true;
 
     async function handleAuthCallback() {
@@ -221,7 +227,7 @@ function AuthCallbackContent() {
         age: numAge,
         gender,
         role: 'User' as const,
-        isEligible: true,
+        isEligible: false, // User must finish the eligibility questions first
         isProfileComplete: false,
         verificationStatus: 'Pending' as const,
         avatarUrl: googleAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
