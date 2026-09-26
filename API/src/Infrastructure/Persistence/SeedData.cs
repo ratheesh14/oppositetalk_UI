@@ -21,7 +21,11 @@ public static class SeedData
                 VerificationStatus = VerificationStatus.Verified
             };
             db.Users.Add(admin);
+            await db.SaveChangesAsync();
+        }
 
+        if (!db.Users.Any(u => u.Email == "alex.m@example.com"))
+        {
             var demoUser = new User
             {
                 Email = "alex.m@example.com",
