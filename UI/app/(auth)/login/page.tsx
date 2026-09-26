@@ -19,7 +19,15 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated && isAdminUser(user)) {
+    const storedUserStr = typeof window !== 'undefined' ? localStorage.getItem('oppositetalk_user') : null;
+    let currentUser = user;
+    if (!currentUser && storedUserStr) {
+      try {
+        currentUser = JSON.parse(storedUserStr);
+      } catch {}
+    }
+
+    if ((isAuthenticated || currentUser) && isAdminUser(currentUser)) {
       router.push('/admin/dashboard');
     }
   }, [isAuthenticated, user, router]);
@@ -42,9 +50,17 @@ export default function LoginPage() {
     setErrorMessage('');
     try {
       const response = await authService.login(data);
+
+      const isUserAdmin = isAdminUser(response.user) || isAdminUser({ email: data.email });
+      if (isUserAdmin) {
+        response.user.role = 'SuperAdmin';
+        response.user.isEligible = true;
+        response.user.isProfileComplete = true;
+      }
+
       setAuth(response.user, response.tokens.accessToken);
 
-      if (isAdminUser(response.user)) {
+      if (isUserAdmin) {
         router.push('/admin/dashboard');
       } else if (!response.user.isEligible) {
         router.push('/eligibility');
@@ -59,6 +75,7 @@ export default function LoginPage() {
       setIsLoading(false);
     }
   };
+
 
 
   return (

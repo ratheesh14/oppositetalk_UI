@@ -37,18 +37,65 @@ function AuthCallbackContent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    let mounted = true;
+
     async function handleAuthCallback() {
       try {
-        // 1. Check existing Auth Store user first
-        const existingUser = useAuthStore.getState().user;
+        // 1. Check existing Auth Store or localStorage backup
+        const storedUserStr = typeof window !== 'undefined' ? localStorage.getItem('oppositetalk_user') : null;
+        let existingUser = useAuthStore.getState().user;
+        if (!existingUser && storedUserStr) {
+          try {
+            existingUser = JSON.parse(storedUserStr);
+          } catch {}
+        }
+
         if (isAdminUser(existingUser)) {
-          setStep('complete');
+          if (mounted) setStep('complete');
           router.push('/admin/dashboard');
           return;
         }
 
-        // 2. Fetch active session from Supabase
-        const { data: { session }, error } = await supabase.auth.getSession();
+        // 2. Subscribe to Supabase Auth State Changes for asynchronous OAuth token delivery
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+          if (!mounted) return;
+          if (session?.user) {
+            const email = session.user.email || '';
+            const name = session.user.user_metadata?.full_name || session.user.user_metadata?.name || '';
+            const avatar = session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture || '';
+            const userRole = session.user.app_metadata?.role || session.user.user_metadata?.role;
+
+            if (isAdminUser({ role: userRole as string, email })) {
+              const adminUser = {
+                id: session.user.id || 'usr_admin_' + Math.random().toString(36).substring(2, 9),
+                email: email || 'info.zentroax@zentroax.com',
+                firstName: name ? name.split(' ')[0] : 'Zentroax',
+                lastName: name ? name.split(' ').slice(1).join(' ') : 'Admin',
+                role: 'SuperAdmin' as const,
+                isEligible: true,
+                isProfileComplete: true,
+                verificationStatus: 'Verified' as const,
+                avatarUrl: avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+                createdAt: new Date().toISOString(),
+              };
+
+              setAuth(adminUser, session.access_token || 'jwt_real_google_oauth_' + Date.now());
+              setStep('complete');
+              router.push('/admin/dashboard');
+            }
+          }
+        });
+
+        // 3. Direct Session Fetching with retry
+        let sessionRes = await supabase.auth.getSession();
+        let session = sessionRes.data.session;
+
+        // If session not found immediately, retry after 500ms
+        if (!session) {
+          await new Promise((res) => setTimeout(res, 500));
+          sessionRes = await supabase.auth.getSession();
+          session = sessionRes.data.session;
+        }
 
         let email = session?.user?.email || '';
         let name = session?.user?.user_metadata?.full_name || session?.user?.user_metadata?.name || '';
@@ -66,7 +113,6 @@ function AuthCallbackContent() {
           }
         }
 
-        // Check if last google auth email was admin
         const lastAuthEmail = typeof window !== 'undefined' ? localStorage.getItem('last_google_auth_email') || '' : '';
         if (!email && lastAuthEmail) {
           email = lastAuthEmail;
@@ -92,23 +138,30 @@ function AuthCallbackContent() {
           const token = session?.access_token || 'jwt_real_google_oauth_' + Date.now();
           setAuth(adminUser, token);
           setStep('complete');
-
           router.push('/admin/dashboard');
           return;
         }
 
-
         if (!email) {
-          // If no session found, redirect to homepage
-          router.push('/');
-          return;
+          // Retry one more time before giving up to avoid kicking valid sessions back to landing page
+          await new Promise((res) => setTimeout(res, 800));
+          const finalCheck = await supabase.auth.getSession();
+          if (!finalCheck.data.session && !localStorage.getItem('oppositetalk_token')) {
+            router.push('/');
+            return;
+          }
+          if (finalCheck.data.session?.user?.email) {
+            email = finalCheck.data.session.user.email;
+          }
         }
 
-        setGoogleUserEmail(email);
-        setGoogleAvatar(avatar);
-        setFullName(name);
-        setLoading(false);
-        setStep('basic_info');
+        if (email) {
+          setGoogleUserEmail(email);
+          setGoogleAvatar(avatar);
+          setFullName(name);
+          setLoading(false);
+          setStep('basic_info');
+        }
       } catch (err) {
         setLoading(false);
         setStep('basic_info');
@@ -116,7 +169,12 @@ function AuthCallbackContent() {
     }
 
     handleAuthCallback();
+
+    return () => {
+      mounted = false;
+    };
   }, [router, setAuth]);
+
 
   const handleSaveBasicInfo = (e: React.FormEvent) => {
     e.preventDefault();

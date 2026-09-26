@@ -11,8 +11,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const { user, isAuthenticated, isLoading } = useAuthStore();
 
-  const isAdmin = isAuthenticated && isAdminUser(user);
-
+  const storedUserStr = typeof window !== 'undefined' ? localStorage.getItem('oppositetalk_user') : null;
+  let currentUser = user;
+  if (!currentUser && storedUserStr) {
+    try {
+      currentUser = JSON.parse(storedUserStr);
+    } catch {}
+  }
+  const isAdmin = (isAuthenticated || !!currentUser) && isAdminUser(currentUser);
 
   useEffect(() => {
     if (!isLoading && !isAdmin) {
@@ -52,3 +58,4 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     </div>
   );
 }
+

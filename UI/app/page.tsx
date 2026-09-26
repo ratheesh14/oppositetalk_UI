@@ -18,13 +18,24 @@ import {
 
 function LandingPageContent() {
   const router = useRouter();
-  const { user, isAuthenticated } = useAuthStore();
+  const { user, isAuthenticated, isLoading } = useAuthStore();
 
   useEffect(() => {
-    if (isAuthenticated && isAdminUser(user)) {
-      router.push('/admin/dashboard');
+    if (!isLoading) {
+      const storedUserStr = typeof window !== 'undefined' ? localStorage.getItem('oppositetalk_user') : null;
+      let currentUser = user;
+      if (!currentUser && storedUserStr) {
+        try {
+          currentUser = JSON.parse(storedUserStr);
+        } catch {}
+      }
+
+      if ((isAuthenticated || !!currentUser) && isAdminUser(currentUser)) {
+        router.push('/admin/dashboard');
+      }
     }
-  }, [isAuthenticated, user, router]);
+  }, [isLoading, isAuthenticated, user, router]);
+
 
   return (
     <div className="w-full min-h-screen bg-[#0b0716] text-purple-100 relative overflow-hidden">
