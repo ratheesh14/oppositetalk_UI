@@ -3,17 +3,22 @@
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
+import { isAdminUser } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 
 export default function OnboardingLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { isAuthenticated, isLoading } = useAuthStore();
+  const { user, isAuthenticated, isLoading } = useAuthStore();
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push('/');
+    if (!isLoading) {
+      if (!isAuthenticated) {
+        router.push('/');
+      } else if (isAdminUser(user)) {
+        router.push('/admin/dashboard');
+      }
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [isLoading, isAuthenticated, user, router]);
 
   if (isLoading) {
     return (
@@ -26,9 +31,10 @@ export default function OnboardingLayout({ children }: { children: React.ReactNo
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || isAdminUser(user)) {
     return null;
   }
 
   return <>{children}</>;
 }
+

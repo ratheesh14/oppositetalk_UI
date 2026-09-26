@@ -1,7 +1,10 @@
 'use client';
 
-import React, { Suspense } from 'react';
+import React, { useEffect, Suspense } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/store/useAuthStore';
+import { isAdminUser } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
 import { signInWithGoogleReal } from '@/lib/supabaseClient';
 import {
@@ -14,6 +17,15 @@ import {
 } from 'lucide-react';
 
 function LandingPageContent() {
+  const router = useRouter();
+  const { user, isAuthenticated } = useAuthStore();
+
+  useEffect(() => {
+    if (isAuthenticated && isAdminUser(user)) {
+      router.push('/admin/dashboard');
+    }
+  }, [isAuthenticated, user, router]);
+
   return (
     <div className="w-full min-h-screen bg-[#0b0716] text-purple-100 relative overflow-hidden">
       {/* FUTURISTIC PURPLE RADIAL GLOW & BACKGROUND PATTERN */}

@@ -17,6 +17,7 @@ import {
 
 import { checkStrictAgeGenderEligibility } from '@/lib/eligibilityRules';
 import { useEligibilityStore } from '@/store/useEligibilityStore';
+import { isAdminUser } from '@/lib/utils';
 
 function AuthCallbackContent() {
   const router = useRouter();
@@ -40,13 +41,7 @@ function AuthCallbackContent() {
       try {
         // 1. Check existing Auth Store user first
         const existingUser = useAuthStore.getState().user;
-        if (
-          existingUser &&
-          (existingUser.role === 'Admin' ||
-            existingUser.role === 'SuperAdmin' ||
-            existingUser.email.toLowerCase().includes('zentroax') ||
-            existingUser.email.toLowerCase().includes('admin'))
-        ) {
+        if (isAdminUser(existingUser)) {
           setStep('complete');
           router.push('/admin/dashboard');
           return;
@@ -78,11 +73,7 @@ function AuthCallbackContent() {
         }
 
         const userRole = session?.user?.app_metadata?.role || session?.user?.user_metadata?.role;
-        const isAdmin =
-          userRole === 'Admin' ||
-          userRole === 'SuperAdmin' ||
-          email.toLowerCase().includes('admin') ||
-          email.toLowerCase().includes('zentroax');
+        const isAdmin = isAdminUser({ role: userRole as string, email });
 
         if (isAdmin) {
           const adminUser = {
@@ -105,6 +96,7 @@ function AuthCallbackContent() {
           router.push('/admin/dashboard');
           return;
         }
+
 
         if (!email) {
           // If no session found, redirect to homepage

@@ -27,3 +27,17 @@ export function formatTimeAgo(dateString?: string): string {
   if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
   return formatDate(dateString);
 }
+
+export function isAdminUser(user?: { role?: string; email?: string } | null): boolean {
+  if (!user) return false;
+  const roleStr = String(user.role || '').toLowerCase();
+  const emailStr = String(user.email || '').toLowerCase();
+  return (
+    roleStr === 'admin' ||
+    roleStr === 'superadmin' ||
+    roleStr === 'owner' ||
+    emailStr.includes('zentroax') ||
+    emailStr.includes('admin')
+  );
+}
+

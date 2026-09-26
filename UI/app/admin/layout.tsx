@@ -3,6 +3,7 @@
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
+import { isAdminUser } from '@/lib/utils';
 import { AdminSidebar } from '@/components/layout/AdminSidebar';
 import { ShieldAlert, Loader2 } from 'lucide-react';
 
@@ -10,7 +11,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const { user, isAuthenticated, isLoading } = useAuthStore();
 
-  const isAdmin = isAuthenticated && (user?.role === 'Admin' || user?.role === 'SuperAdmin');
+  const isAdmin = isAuthenticated && isAdminUser(user);
+
 
   useEffect(() => {
     if (!isLoading && !isAdmin) {

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -8,14 +8,21 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema, LoginFormData } from '@/schemas/authSchema';
 import { authService } from '@/services/authService';
 import { useAuthStore } from '@/store/useAuthStore';
+import { isAdminUser } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
 import { LogIn, Lock, Mail, ArrowRight } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
-  const setAuth = useAuthStore((s) => s.setAuth);
+  const { user, isAuthenticated, setAuth } = useAuthStore();
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated && isAdminUser(user)) {
+      router.push('/admin/dashboard');
+    }
+  }, [isAuthenticated, user, router]);
 
   const {
     register,
@@ -37,7 +44,7 @@ export default function LoginPage() {
       const response = await authService.login(data);
       setAuth(response.user, response.tokens.accessToken);
 
-      if (response.user.role === 'Admin' || response.user.role === 'SuperAdmin') {
+      if (isAdminUser(response.user)) {
         router.push('/admin/dashboard');
       } else if (!response.user.isEligible) {
         router.push('/eligibility');
@@ -52,6 +59,7 @@ export default function LoginPage() {
       setIsLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center px-4 py-12 bg-slate-50">
