@@ -5,11 +5,10 @@ import Link from 'next/link';
 import { useEligibilityStore } from '@/store/useEligibilityStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Button } from '@/components/ui/Button';
-import { CheckCircle2, ShieldAlert, ArrowRight, RefreshCw, Home } from 'lucide-react';
+import { CheckCircle2, ShieldAlert, ArrowRight, Home, HeartHandshake } from 'lucide-react';
 
 export default function EligibilityResultPage() {
   const result = useEligibilityStore((s) => s.result);
-  const resetAssessment = useEligibilityStore((s) => s.resetAssessment);
   const user = useAuthStore((s) => s.user);
   const updateUser = useAuthStore((s) => s.updateUser);
 
@@ -32,7 +31,7 @@ export default function EligibilityResultPage() {
               <CheckCircle2 className="w-10 h-10" />
             </div>
 
-            <span className="text-[11px] font-bold uppercase tracking-widest text-emerald-400 bg-emerald-950/80 px-3 py-1 rounded-full border border-emerald-500/40">
+            <span className="text-[11px] font-bold uppercase tracking-widest text-emerald-400 bg-emerald-950/80 px-3.5 py-1 rounded-full border border-emerald-500/40">
               Verified & Evaluated
             </span>
 
@@ -51,47 +50,48 @@ export default function EligibilityResultPage() {
           </div>
         ) : (
           <div>
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-rose-500/20 text-rose-400 mb-6 border border-rose-500/40 shadow-[0_0_20px_rgba(244,63,94,0.3)]">
-              <ShieldAlert className="w-10 h-10" />
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-fuchsia-500/20 text-fuchsia-400 mb-6 border border-fuchsia-500/40 shadow-[0_0_25px_rgba(217,70,239,0.35)]">
+              <HeartHandshake className="w-10 h-10 text-fuchsia-400" />
             </div>
 
-            <span className="text-[11px] font-bold uppercase tracking-widest text-rose-400 bg-rose-950/80 px-3 py-1 rounded-full border border-rose-500/40">
-              Profile Ineligible
+            <span className="text-[11px] font-bold uppercase tracking-widest text-fuchsia-400 bg-fuchsia-950/80 px-3.5 py-1 rounded-full border border-fuchsia-500/40">
+              OppositeTalk Eligibility Notice
             </span>
 
-            <h1 className="font-serif text-2xl sm:text-3xl font-bold text-white mt-4">Registration Restricted</h1>
+            {/* Main Message requested by user */}
+            <h1 className="font-serif text-2xl sm:text-3xl font-bold text-white mt-4 leading-tight">
+              You are not ready for the marriage
+            </h1>
 
-            {result?.reasons && result.reasons.length > 0 ? (
-              <div className="mt-6 rounded-2xl bg-purple-950/80 p-5 text-left border border-rose-500/40 shadow-inner">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-rose-300 mb-2.5 flex items-center gap-1.5">
-                  <ShieldAlert className="w-3.5 h-3.5" />
-                  Eligibility Criteria Notice
-                </h4>
-                <ul className="space-y-2">
+            {/* Sub-message requested by user */}
+            <p className="text-fuchsia-300 font-medium text-base sm:text-lg mt-2">
+              Will See you soon
+            </p>
+
+            {/* Explanation box */}
+            <div className="mt-6 rounded-2xl bg-purple-950/80 p-5 text-left border border-purple-700/60 shadow-inner">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-purple-300 mb-2 flex items-center gap-1.5">
+                <ShieldAlert className="w-3.5 h-3.5 text-fuchsia-400" />
+                Community Age Policy
+              </h4>
+              <p className="text-xs text-purple-200 leading-relaxed">
+                OppositeTalk is exclusively dedicated to marriage-focused commitments for <strong>Males above 26</strong> (27+) and <strong>Females above 24</strong> (25+).
+              </p>
+              {result?.reasons && result.reasons.length > 0 && (
+                <ul className="mt-3 space-y-1.5 border-t border-purple-800/50 pt-2.5">
                   {result.reasons.map((reason, idx) => (
-                    <li key={idx} className="text-xs text-purple-200 leading-relaxed font-medium">
+                    <li key={idx} className="text-[11px] text-purple-300/90 leading-normal">
                       • {reason}
                     </li>
                   ))}
                 </ul>
-              </div>
-            ) : (
-              <div className="mt-6 rounded-2xl bg-purple-950/80 p-5 text-left border border-rose-500/40">
-                <p className="text-xs text-purple-200 leading-relaxed">
-                  OppositeTalk strictly enforces age criteria: <strong>Males must be above 26</strong> (27+) and <strong>Females must be above 24</strong> (25+). Based on your submitted age, your profile cannot proceed.
-                </p>
-              </div>
-            )}
+              )}
+            </div>
 
-            <div className="mt-8 flex flex-col gap-3">
-              <Link href="/auth/callback">
-                <Button variant="outline" size="md" className="w-full border-purple-700/60 text-purple-200 hover:bg-purple-900/60 text-xs">
-                  <RefreshCw className="w-3.5 h-3.5 mr-2" /> Re-enter Age & Information
-                </Button>
-              </Link>
+            <div className="mt-8 pt-4 border-t border-purple-900/60">
               <Link href="/">
-                <Button variant="ghost" size="sm" className="w-full text-xs text-purple-300 hover:text-white">
-                  <Home className="w-3.5 h-3.5 mr-1.5" /> Return to Homepage
+                <Button variant="neon" size="md" className="w-full font-bold text-xs py-3.5">
+                  <Home className="w-4 h-4 mr-2" /> Return to Homepage
                 </Button>
               </Link>
             </div>
