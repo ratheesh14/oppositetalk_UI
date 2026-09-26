@@ -107,8 +107,8 @@ function AuthCallbackContent() {
         }
 
         if (!email) {
-          // If no session found and not admin, redirect to login page
-          router.push('/login');
+          // If no session found, redirect to homepage
+          router.push('/');
           return;
         }
 
