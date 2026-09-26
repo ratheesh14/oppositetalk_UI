@@ -118,8 +118,20 @@ function AuthCallbackContent() {
           setLoading(false);
           setStep('basic_info');
         } else {
-          router.push('/');
+          // Check if auth store or localStorage has existing user state
+          const storedToken = typeof window !== 'undefined' ? localStorage.getItem('oppositetalk_token') : null;
+          if (existingUser || storedToken) {
+            const userToRedirect = existingUser || (storedUserStr ? JSON.parse(storedUserStr) : null);
+            if (isAdminUser(userToRedirect)) {
+              router.push('/admin/dashboard');
+              return;
+            }
+          }
+          // If no session from Supabase, allow basic info entry
+          setLoading(false);
+          setStep('basic_info');
         }
+
       } catch (err) {
         setLoading(false);
         setStep('basic_info');
