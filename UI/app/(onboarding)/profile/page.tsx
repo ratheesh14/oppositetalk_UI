@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useProfileWizardStore, TOTAL_PROFILE_STEPS } from '@/store/useProfileWizardStore';
 import { profileService } from '@/services/profileService';
@@ -13,13 +12,7 @@ import {
   GraduationCap,
   Briefcase,
   MapPin,
-  Coffee,
-  Heart,
-  Home,
-  DollarSign,
-  Globe,
   Sparkles,
-  Camera,
   CheckCircle2,
   ArrowLeft,
   ArrowRight,
@@ -70,17 +63,29 @@ export default function ProfileWizardPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-8rem)] bg-slate-50 py-10 px-4">
-      <div className="mx-auto max-w-3xl bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-10 shadow-xl">
+    <div className="min-h-[calc(100vh-4rem)] bg-[#0b0716] text-purple-100 py-10 px-4 relative overflow-hidden">
+      {/* Radial Background Orbs */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-purple-700/15 rounded-full blur-[160px] pointer-events-none" />
+      
+      <div className="mx-auto max-w-3xl futuristic-card rounded-3xl border border-purple-500/40 p-6 sm:p-10 shadow-[0_0_50px_rgba(168,85,247,0.2)] backdrop-blur-2xl relative z-10">
         {/* Wizard Header */}
-        <div className="mb-8 border-b border-slate-100 pb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+        <div className="mb-8 border-b border-purple-900/60 pb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Step {currentStep} of {TOTAL_PROFILE_STEPS}</span>
-              <h1 className="font-serif text-2xl font-bold text-slate-900">{STEP_TITLES[currentStep - 1]}</h1>
+              <span className="text-xs font-bold uppercase tracking-widest text-fuchsia-400">
+                Step {currentStep} of {TOTAL_PROFILE_STEPS}
+              </span>
+              <h1 className="font-serif text-2xl sm:text-3xl font-bold text-white mt-1">
+                {STEP_TITLES[currentStep - 1]}
+              </h1>
             </div>
-            <Button variant="ghost" size="sm" onClick={handleSaveDraft} className="text-xs self-start sm:self-auto">
-              <Save className="w-3.5 h-3.5 mr-1" /> Save & Exit
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSaveDraft}
+              className="text-xs self-start sm:self-auto border-purple-700/60 text-purple-200 hover:bg-purple-900/60"
+            >
+              <Save className="w-3.5 h-3.5 mr-1 text-fuchsia-400" /> Save & Exit
             </Button>
           </div>
 
@@ -89,161 +94,191 @@ export default function ProfileWizardPage() {
 
         {/* Dynamic Step Forms */}
         <div className="py-2">
+          {/* STEP 1: Basic Information */}
           {currentStep === 1 && (
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Display Name</label>
+                <label className="block text-xs font-bold text-purple-200 mb-1.5 flex items-center gap-1.5">
+                  <User className="w-3.5 h-3.5 text-fuchsia-400" />
+                  Display Name
+                </label>
                 <input
                   type="text"
                   value={draftProfile.basicInfo?.displayName || ''}
                   onChange={(e) =>
                     updateDraft({ basicInfo: { ...draftProfile.basicInfo!, displayName: e.target.value } })
                   }
-                  className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:ring-2 focus:ring-slate-900"
+                  placeholder="Enter your full display name"
+                  className="w-full rounded-xl bg-purple-950/80 border border-purple-700/60 px-4 py-3 text-sm text-white placeholder-purple-400/50 focus:outline-none focus:ring-2 focus:ring-fuchsia-500 shadow-inner"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Age</label>
+                  <label className="block text-xs font-bold text-purple-200 mb-1.5">Age</label>
                   <input
                     type="number"
-                    value={draftProfile.basicInfo?.age || 28}
+                    value={draftProfile.basicInfo?.age || ''}
                     onChange={(e) =>
                       updateDraft({ basicInfo: { ...draftProfile.basicInfo!, age: Number(e.target.value) } })
                     }
-                    className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:ring-2 focus:ring-slate-900"
+                    placeholder="e.g. 28"
+                    min="18"
+                    max="120"
+                    className="w-full rounded-xl bg-purple-950/80 border border-purple-700/60 px-4 py-3 text-sm text-white placeholder-purple-400/50 focus:outline-none focus:ring-2 focus:ring-fuchsia-500 shadow-inner"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Gender</label>
+                  <label className="block text-xs font-bold text-purple-200 mb-1.5">Gender</label>
                   <select
                     value={draftProfile.basicInfo?.gender || 'Male'}
                     onChange={(e) =>
                       updateDraft({ basicInfo: { ...draftProfile.basicInfo!, gender: e.target.value } })
                     }
-                    className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:ring-2 focus:ring-slate-900 bg-white"
+                    className="w-full rounded-xl bg-purple-950/90 border border-purple-700/60 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-fuchsia-500 cursor-pointer"
                   >
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
+                    <option value="Male" className="bg-[#130b24] text-white">Male</option>
+                    <option value="Female" className="bg-[#130b24] text-white">Female</option>
+                    <option value="Non-binary" className="bg-[#130b24] text-white">Non-binary</option>
                   </select>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">About / Bio</label>
+                <label className="block text-xs font-bold text-purple-200 mb-1.5">About / Bio</label>
                 <textarea
                   rows={4}
                   value={draftProfile.basicInfo?.bio || ''}
                   onChange={(e) =>
                     updateDraft({ basicInfo: { ...draftProfile.basicInfo!, bio: e.target.value } })
                   }
-                  className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:ring-2 focus:ring-slate-900"
+                  placeholder="Share a brief overview of your values, personal journey, and relationship goals..."
+                  className="w-full rounded-xl bg-purple-950/80 border border-purple-700/60 px-4 py-3 text-sm text-white placeholder-purple-400/50 focus:outline-none focus:ring-2 focus:ring-fuchsia-500 shadow-inner"
                 />
               </div>
             </div>
           )}
 
+          {/* STEP 2: Education */}
           {currentStep === 2 && (
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Highest Degree Level</label>
+                <label className="block text-xs font-bold text-purple-200 mb-1.5 flex items-center gap-1.5">
+                  <GraduationCap className="w-3.5 h-3.5 text-fuchsia-400" />
+                  Highest Degree Level
+                </label>
                 <input
                   type="text"
                   value={draftProfile.education?.degreeLevel || ''}
                   onChange={(e) =>
                     updateDraft({ education: { ...draftProfile.education!, degreeLevel: e.target.value } })
                   }
-                  className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm"
+                  placeholder="e.g. Master's Degree"
+                  className="w-full rounded-xl bg-purple-950/80 border border-purple-700/60 px-4 py-3 text-sm text-white placeholder-purple-400/50 focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Field of Study</label>
+                <label className="block text-xs font-bold text-purple-200 mb-1.5">Field of Study</label>
                 <input
                   type="text"
                   value={draftProfile.education?.fieldOfStudy || ''}
                   onChange={(e) =>
                     updateDraft({ education: { ...draftProfile.education!, fieldOfStudy: e.target.value } })
                   }
-                  className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm"
+                  placeholder="e.g. Computer Science / Business Administration"
+                  className="w-full rounded-xl bg-purple-950/80 border border-purple-700/60 px-4 py-3 text-sm text-white placeholder-purple-400/50 focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
                 />
               </div>
             </div>
           )}
 
+          {/* STEP 3: Profession */}
           {currentStep === 3 && (
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Job Title</label>
+                <label className="block text-xs font-bold text-purple-200 mb-1.5 flex items-center gap-1.5">
+                  <Briefcase className="w-3.5 h-3.5 text-fuchsia-400" />
+                  Profession / Job Title
+                </label>
                 <input
                   type="text"
                   value={draftProfile.profession?.title || ''}
                   onChange={(e) =>
                     updateDraft({ profession: { ...draftProfile.profession!, title: e.target.value } })
                   }
-                  className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm"
+                  placeholder="e.g. Senior Software Engineer"
+                  className="w-full rounded-xl bg-purple-950/80 border border-purple-700/60 px-4 py-3 text-sm text-white placeholder-purple-400/50 focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Industry</label>
+                <label className="block text-xs font-bold text-purple-200 mb-1.5">Industry</label>
                 <input
                   type="text"
                   value={draftProfile.profession?.industry || ''}
                   onChange={(e) =>
                     updateDraft({ profession: { ...draftProfile.profession!, industry: e.target.value } })
                   }
-                  className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm"
+                  placeholder="e.g. Technology / Healthcare / Finance"
+                  className="w-full rounded-xl bg-purple-950/80 border border-purple-700/60 px-4 py-3 text-sm text-white placeholder-purple-400/50 focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
                 />
               </div>
             </div>
           )}
 
+          {/* STEP 4: Location */}
           {currentStep === 4 && (
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">City & State</label>
+                <label className="block text-xs font-bold text-purple-200 mb-1.5 flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-fuchsia-400" />
+                  City & State
+                </label>
                 <input
                   type="text"
                   value={draftProfile.location?.city || ''}
                   onChange={(e) =>
                     updateDraft({ location: { ...draftProfile.location!, city: e.target.value } })
                   }
-                  className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm"
+                  placeholder="e.g. Chicago, IL"
+                  className="w-full rounded-xl bg-purple-950/80 border border-purple-700/60 px-4 py-3 text-sm text-white placeholder-purple-400/50 focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Country</label>
+                <label className="block text-xs font-bold text-purple-200 mb-1.5">Country</label>
                 <input
                   type="text"
                   value={draftProfile.location?.country || ''}
                   onChange={(e) =>
                     updateDraft({ location: { ...draftProfile.location!, country: e.target.value } })
                   }
-                  className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm"
+                  placeholder="e.g. United States"
+                  className="w-full rounded-xl bg-purple-950/80 border border-purple-700/60 px-4 py-3 text-sm text-white placeholder-purple-400/50 focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
                 />
               </div>
             </div>
           )}
 
+          {/* STEPS 5 to 10 */}
           {currentStep >= 5 && currentStep <= 10 && (
-            <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 text-center">
-              <Sparkles className="w-8 h-8 text-amber-500 mx-auto mb-2" />
-              <h3 className="font-semibold text-slate-900 text-base">{STEP_TITLES[currentStep - 1]} Settings</h3>
-              <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
-                Preferences loaded into your profile draft. You can customize them anytime in Settings.
+            <div className="p-8 rounded-2xl bg-purple-950/60 border border-purple-800/60 text-center">
+              <Sparkles className="w-10 h-10 text-fuchsia-400 mx-auto mb-3 shadow-[0_0_15px_rgba(217,70,239,0.5)]" />
+              <h3 className="font-serif font-bold text-white text-lg">{STEP_TITLES[currentStep - 1]} Preferences</h3>
+              <p className="text-xs text-purple-300/80 mt-2 max-w-md mx-auto leading-relaxed">
+                Loaded into your OppositeTalk profile draft. You can fine-tune these preferences anytime in Settings.
               </p>
             </div>
           )}
 
+          {/* STEP 11: Photos */}
           {currentStep === 11 && (
             <div className="space-y-4">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-500">Upload Photos</h4>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-purple-300">Profile Photos</h4>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 {draftProfile.photos?.map((photo) => (
-                  <div key={photo.id} className="relative rounded-2xl overflow-hidden border border-slate-200 group">
+                  <div key={photo.id} className="relative rounded-2xl overflow-hidden border border-purple-700/60 group">
                     <img src={photo.url} alt="Profile" className="w-full h-36 object-cover" />
                     {photo.isMain && (
-                      <span className="absolute top-2 left-2 bg-slate-900 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
+                      <span className="absolute top-2 left-2 bg-fuchsia-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
                         Main
                       </span>
                     )}
@@ -253,43 +288,61 @@ export default function ProfileWizardPage() {
             </div>
           )}
 
+          {/* STEP 12: Review & Submit */}
           {currentStep === 12 && (
-            <div className="space-y-4">
-              <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-4 text-emerald-800">
-                <CheckCircle2 className="w-6 h-6 text-emerald-600 mb-1" />
-                <h4 className="font-semibold text-sm">Profile Ready for Final Verification</h4>
-                <p className="text-xs mt-1">Review all entries before making your profile active.</p>
+            <div className="space-y-5">
+              <div className="rounded-2xl bg-fuchsia-950/80 border border-fuchsia-500/40 p-5 text-fuchsia-200">
+                <CheckCircle2 className="w-7 h-7 text-fuchsia-400 mb-2" />
+                <h4 className="font-bold text-base text-white">Profile Ready for Completion!</h4>
+                <p className="text-xs mt-1 text-purple-200/80">Review all details before activating your profile on OppositeTalk.</p>
               </div>
 
-              <div className="rounded-2xl border border-slate-200 p-4 bg-white text-xs space-y-2">
-                <p><strong>Name:</strong> {draftProfile.basicInfo?.displayName}</p>
-                <p><strong>Age:</strong> {draftProfile.basicInfo?.age} years old</p>
-                <p><strong>Profession:</strong> {draftProfile.profession?.title}</p>
-                <p><strong>Location:</strong> {draftProfile.location?.city}, {draftProfile.location?.country}</p>
+              <div className="rounded-2xl border border-purple-800/60 p-5 bg-purple-950/60 text-xs space-y-2 text-purple-200">
+                <p><strong>Display Name:</strong> <span className="text-white font-semibold">{draftProfile.basicInfo?.displayName}</span></p>
+                <p><strong>Age:</strong> <span className="text-white font-semibold">{draftProfile.basicInfo?.age} years old</span></p>
+                <p><strong>Profession:</strong> <span className="text-white font-semibold">{draftProfile.profession?.title}</span></p>
+                <p><strong>Location:</strong> <span className="text-white font-semibold">{draftProfile.location?.city}, {draftProfile.location?.country}</span></p>
               </div>
             </div>
           )}
         </div>
 
         {/* Step Navigation Controls */}
-        <div className="flex justify-between items-center pt-8 mt-8 border-t border-slate-100">
-          <Button variant="outline" size="md" onClick={prevStep} disabled={currentStep === 1}>
+        <div className="flex justify-between items-center pt-8 mt-8 border-t border-purple-900/60">
+          <Button
+            variant="outline"
+            size="md"
+            onClick={prevStep}
+            disabled={currentStep === 1}
+            className="border-purple-700/60 text-purple-200 hover:bg-purple-900/60"
+          >
             <ArrowLeft className="w-4 h-4 mr-1" /> Back
           </Button>
 
           {currentStep === TOTAL_PROFILE_STEPS ? (
-            <Button size="md" onClick={handleCompleteWizard} isLoading={isSubmitting} className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold">
+            <Button
+              size="md"
+              variant="neon"
+              onClick={handleCompleteWizard}
+              isLoading={isSubmitting}
+              className="font-bold px-8 py-3"
+            >
               Complete Profile
             </Button>
           ) : (
-            <Button size="md" onClick={nextStep} className="bg-slate-900 text-white">
+            <Button
+              size="md"
+              variant="neon"
+              onClick={nextStep}
+              className="font-bold px-8 py-3"
+            >
               Next Step <ArrowRight className="w-4 h-4 ml-1" />
             </Button>
           )}
         </div>
 
         {saveMessage && (
-          <div className="mt-4 p-2 rounded-xl bg-slate-900 text-white text-center text-xs animate-in fade-in">
+          <div className="mt-4 p-3 rounded-xl bg-purple-950 border border-purple-700 text-white text-center text-xs animate-in fade-in">
             Draft saved successfully.
           </div>
         )}

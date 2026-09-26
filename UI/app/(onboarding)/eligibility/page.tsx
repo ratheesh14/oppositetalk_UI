@@ -6,8 +6,7 @@ import { useEligibilityStore } from '@/store/useEligibilityStore';
 import { eligibilityService } from '@/services/eligibilityService';
 import { Button } from '@/components/ui/Button';
 import { ProgressBar } from '@/components/ui/ProgressBar';
-import { Badge } from '@/components/ui/Badge';
-import { ArrowLeft, ArrowRight, Save, CheckCircle, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Save, CheckCircle, ShieldCheck, Loader2 } from 'lucide-react';
 
 export default function EligibilityPage() {
   const router = useRouter();
@@ -42,10 +41,10 @@ export default function EligibilityPage() {
 
   if (isLoading || questions.length === 0) {
     return (
-      <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center p-6">
+      <div className="min-h-[calc(100vh-4rem)] bg-[#0b0716] flex items-center justify-center p-6 text-purple-200">
         <div className="text-center">
-          <div className="animate-spin h-8 w-8 border-4 border-slate-900 border-t-transparent rounded-full mx-auto mb-4" />
-          <p className="text-xs text-slate-500 font-medium">Loading Eligibility Questions from Backend...</p>
+          <Loader2 className="w-10 h-10 text-fuchsia-400 animate-spin mx-auto mb-4" />
+          <p className="text-xs text-purple-300 font-semibold">Loading Eligibility Questions...</p>
         </div>
       </div>
     );
@@ -79,19 +78,22 @@ export default function EligibilityPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-8rem)] bg-slate-50 py-10 px-4">
-      <div className="mx-auto max-w-2xl bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-10 shadow-xl">
-        {/* Header Header & Progress Bar */}
+    <div className="min-h-[calc(100vh-4rem)] bg-[#0b0716] text-purple-100 py-10 px-4 relative overflow-hidden">
+      {/* Background Radial Glow */}
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-purple-700/15 rounded-full blur-[160px] pointer-events-none" />
+
+      <div className="mx-auto max-w-2xl futuristic-card rounded-3xl border border-purple-500/40 p-6 sm:p-10 shadow-[0_0_50px_rgba(168,85,247,0.2)] backdrop-blur-2xl relative z-10">
+        {/* Header & Progress Bar */}
         <div className="mb-6">
-          <div className="flex items-center justify-between text-xs text-slate-500 mb-2">
+          <div className="flex items-center justify-between text-xs text-purple-300/80 mb-3">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-amber-600" />
-              <span className="font-semibold uppercase tracking-wider text-slate-700">
+              <ShieldCheck className="w-4 h-4 text-fuchsia-400" />
+              <span className="font-bold uppercase tracking-widest text-fuchsia-300">
                 {currentQuestion.section}
               </span>
             </div>
             <span>
-              Question <strong className="text-slate-900">{currentIndex + 1}</strong> of {questions.length}
+              Question <strong className="text-white">{currentIndex + 1}</strong> of {questions.length}
             </span>
           </div>
 
@@ -100,44 +102,44 @@ export default function EligibilityPage() {
 
         {/* Question Text */}
         <div className="my-8">
-          <h2 className="font-serif text-xl sm:text-2xl font-bold text-slate-900 leading-snug">
+          <h2 className="font-serif text-xl sm:text-2xl font-bold text-white leading-snug">
             {currentQuestion.questionText}
           </h2>
           {currentQuestion.description && (
-            <p className="text-xs sm:text-sm text-slate-500 mt-2 leading-relaxed">
+            <p className="text-xs sm:text-sm text-purple-300/80 mt-2.5 leading-relaxed">
               {currentQuestion.description}
             </p>
           )}
         </div>
 
         {/* Option Selectable Cards */}
-        <div className="space-y-3 my-8">
+        <div className="space-y-3.5 my-8">
           {currentQuestion.options.map((option) => {
             const isSelected = selectedOptionId === option.id;
             return (
               <button
                 key={option.id}
                 onClick={() => handleOptionClick(option.id)}
-                className={`w-full text-left p-4 rounded-2xl border transition-all duration-200 flex items-center justify-between cursor-pointer ${
+                className={`w-full text-left p-4 sm:p-5 rounded-2xl border transition-all duration-200 flex items-center justify-between cursor-pointer ${
                   isSelected
-                    ? 'border-slate-900 bg-slate-900 text-white shadow-md'
-                    : 'border-slate-200 bg-slate-50 hover:bg-slate-100/80 text-slate-800'
+                    ? 'border-fuchsia-400 bg-fuchsia-600/30 text-white shadow-[0_0_20px_rgba(217,70,239,0.4)]'
+                    : 'border-purple-800/60 bg-purple-950/60 hover:bg-purple-900/60 text-purple-100'
                 }`}
               >
                 <div>
-                  <p className="text-sm font-semibold leading-snug">{option.text}</p>
+                  <p className="text-sm font-bold leading-snug">{option.text}</p>
                   {option.subtext && (
-                    <p className={`text-xs mt-1 ${isSelected ? 'text-slate-300' : 'text-slate-500'}`}>
+                    <p className={`text-xs mt-1 ${isSelected ? 'text-fuchsia-200' : 'text-purple-300/70'}`}>
                       {option.subtext}
                     </p>
                   )}
                 </div>
                 <div
-                  className={`h-5 w-5 rounded-full border flex items-center justify-center shrink-0 ml-3 ${
-                    isSelected ? 'border-amber-400 bg-amber-400 text-slate-900' : 'border-slate-300'
+                  className={`h-6 w-6 rounded-full border flex items-center justify-center shrink-0 ml-3 ${
+                    isSelected ? 'border-fuchsia-400 bg-fuchsia-500 text-white' : 'border-purple-700/60'
                   }`}
                 >
-                  {isSelected && <CheckCircle className="w-3.5 h-3.5" />}
+                  {isSelected && <CheckCircle className="w-4 h-4" />}
                 </div>
               </button>
             );
@@ -145,17 +147,18 @@ export default function EligibilityPage() {
         </div>
 
         {/* Controls: Back, Save, Next/Submit */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-100">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-purple-900/60">
           <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
             <Button
               variant="outline"
               size="md"
               onClick={previousQuestion}
               disabled={currentIndex === 0}
+              className="border-purple-700/60 text-purple-200 hover:bg-purple-900/60"
             >
               <ArrowLeft className="w-4 h-4 mr-1" /> Back
             </Button>
-            <Button variant="ghost" size="sm" onClick={handleSaveProgress} className="text-xs">
+            <Button variant="ghost" size="sm" onClick={handleSaveProgress} className="text-xs text-purple-300">
               <Save className="w-3.5 h-3.5 mr-1" /> Save Progress
             </Button>
           </div>
@@ -163,19 +166,21 @@ export default function EligibilityPage() {
           {isLastQuestion ? (
             <Button
               size="md"
+              variant="neon"
               onClick={handleSubmitAssessment}
               disabled={!selectedOptionId}
               isLoading={isSubmitting}
-              className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold w-full sm:w-auto"
+              className="font-bold px-8 py-3 w-full sm:w-auto"
             >
               Submit Assessment
             </Button>
           ) : (
             <Button
               size="md"
+              variant="neon"
               onClick={nextQuestion}
               disabled={!selectedOptionId}
-              className="bg-slate-900 text-white w-full sm:w-auto"
+              className="font-bold px-8 py-3 w-full sm:w-auto"
             >
               Continue <ArrowRight className="w-4 h-4 ml-1" />
             </Button>
@@ -183,7 +188,7 @@ export default function EligibilityPage() {
         </div>
 
         {saveToast && (
-          <div className="mt-4 p-2 rounded-xl bg-slate-900 text-white text-center text-xs animate-in fade-in">
+          <div className="mt-4 p-3 rounded-xl bg-purple-950 border border-purple-700 text-white text-center text-xs animate-in fade-in">
             Progress saved to server draft.
           </div>
         )}

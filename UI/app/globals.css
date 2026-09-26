@@ -64,6 +64,17 @@ body {
   font-feature-settings: "rlig" 1, "calt" 1;
 }
 
+/* Ensure text in all form fields is high-contrast and crystal clear */
+input, select, textarea {
+  color: #ffffff;
+}
+
+.bg-white input,
+.bg-white select,
+.bg-white textarea {
+  color: #0f172a;
+}
+
 /* Futuristic Glow Effects */
 .purple-glow-sm {
   box-shadow: 0 0 15px -3px rgba(168, 85, 247, 0.25);
