@@ -3,7 +3,8 @@ import { createClient } from '@supabase/supabase-js';
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://uqddffqzhbbzmnaikayl.supabase.co';
 const SUPABASE_ANON_KEY =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxZGRmZnF6aGJiem1uYWlrYXlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAxNzA0NjAsImV4cCI6MjA1NTc0NjQ2MH0.placeholder';
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxZGRmZnF6aGJiem1uYWlrYXlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA0MDA3MDAsImV4cCI6MjEwNTk3NjcwMH0.9X9HjQPBkACgIH6jMmuab_65TFjvaq33AA-tzGFbatU';
+
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
