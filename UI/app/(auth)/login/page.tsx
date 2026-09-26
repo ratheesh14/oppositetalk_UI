@@ -37,7 +37,9 @@ export default function LoginPage() {
       const response = await authService.login(data);
       setAuth(response.user, response.tokens.accessToken);
 
-      if (!response.user.isEligible) {
+      if (response.user.role === 'Admin' || response.user.role === 'SuperAdmin') {
+        router.push('/admin/dashboard');
+      } else if (!response.user.isEligible) {
         router.push('/eligibility');
       } else if (!response.user.isProfileComplete) {
         router.push('/profile');
