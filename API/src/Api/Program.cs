@@ -22,7 +22,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // 1. Add DbContext
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
-    ?? "Host=db.uqddffqzhbbzmnaikayl.supabase.co;Port=5432;Database=postgres;Username=postgres;Password=[YOUR-PASSWORD];SSL Mode=Require;Trust Server Certificate=true";
+    ?? "Host=aws-0-ap-northeast-2.pooler.supabase.com;Port=5432;Database=postgres;Username=postgres.uqddffqzhbbzmnaikayl;Password=Zentroax@14;SSL Mode=Require;Trust Server Certificate=true";
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
@@ -110,13 +110,13 @@ app.MapAdminEndpoints();
 // Map SignalR Chat Hub
 app.MapHub<ChatHub>("/hubs/chat");
 
-// Seed Database
+// Seed Database & Run Migrations
 using (var scope = app.Services.CreateScope())
 {
     try
     {
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        db.Database.EnsureCreated();
+        db.Database.Migrate();
         await SeedData.SeedAsync(db);
     }
     catch (Exception ex)
