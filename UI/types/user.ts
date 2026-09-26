@@ -1,4 +1,4 @@
-export type UserRole = 'User' | 'Admin' | 'Moderator';
+export type UserRole = 'User' | 'Admin' | 'Moderator' | 'SuperAdmin';
 
 export type UserVerificationStatus = 'Unverified' | 'Pending' | 'Verified' | 'Rejected';
 

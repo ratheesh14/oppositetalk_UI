@@ -67,15 +67,16 @@ function AuthCallbackContent() {
         setGoogleAvatar(avatar);
         setFullName(name);
 
-        const isAdmin = email.trim().toLowerCase() === 'info.zentroax@zentroax.com';
+        const userRole = session?.user?.app_metadata?.role || session?.user?.user_metadata?.role;
+        const isAdmin = userRole === 'Admin' || userRole === 'SuperAdmin';
 
         if (isAdmin) {
           const adminUser = {
-            id: 'usr_admin_zentroax',
-            email: 'info.zentroax@zentroax.com',
-            firstName: 'Zentroax',
-            lastName: 'Admin',
-            role: 'Admin' as const,
+            id: session?.user?.id || 'usr_' + Math.random().toString(36).substring(2, 9),
+            email,
+            firstName: name ? name.split(' ')[0] : 'Admin',
+            lastName: name ? name.split(' ').slice(1).join(' ') : 'User',
+            role: (userRole as 'Admin' | 'SuperAdmin') || 'Admin',
             isEligible: true,
             isProfileComplete: true,
             verificationStatus: 'Verified' as const,
@@ -83,8 +84,8 @@ function AuthCallbackContent() {
             createdAt: new Date().toISOString(),
           };
 
-          const mockToken = session?.access_token || 'real_jwt_google_admin_token_' + Date.now();
-          setAuth(adminUser, mockToken);
+          const token = session?.access_token || 'jwt_real_google_oauth_' + Date.now();
+          setAuth(adminUser, token);
           setStep('complete');
 
           setTimeout(() => {

@@ -10,7 +10,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const { user, isAuthenticated, isLoading } = useAuthStore();
 
-  const isAdmin = isAuthenticated && (user?.role === 'Admin' || user?.email === 'info.zentroax@zentroax.com');
+  const isAdmin = isAuthenticated && (user?.role === 'Admin' || user?.role === 'SuperAdmin');
 
   useEffect(() => {
     if (!isLoading && !isAdmin) {
@@ -36,7 +36,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <ShieldAlert className="w-12 h-12 text-rose-400 mx-auto mb-4" />
           <h2 className="text-xl font-bold text-white font-serif">Access Denied</h2>
           <p className="text-xs text-purple-300/70 mt-2">
-            You must be logged in as an Administrator (info.zentroax@zentroax.com) to view the Admin Control Hub.
+            You must be logged in with an Administrator account to view the Admin Control Hub.
           </p>
         </div>
       </div>
