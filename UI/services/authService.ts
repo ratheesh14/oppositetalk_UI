@@ -26,8 +26,8 @@ export const authService = {
         lastName: data.lastName || '',
         role: 'User',
         isEligible: true,
-        isProfileComplete: true,
-        verificationStatus: 'Verified',
+        isProfileComplete: false,
+        verificationStatus: 'Pending',
         avatarUrl: data.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
         createdAt: new Date().toISOString(),
       };
@@ -41,6 +41,7 @@ export const authService = {
       };
     }
   },
+
 
   async login(data: LoginFormData): Promise<AuthResponse> {
     try {

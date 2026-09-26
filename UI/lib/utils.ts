@@ -29,17 +29,16 @@ export function formatTimeAgo(dateString?: string): string {
 }
 
 export function isAdminUser(user?: { role?: string | number; email?: string } | null): boolean {
-  if (!user) return false;
-  const roleStr = String(user.role ?? '').toLowerCase();
-  return (
-    roleStr === 'admin' ||
-    roleStr === 'superadmin' ||
-    roleStr === 'owner' ||
-    roleStr === '3' ||
-    roleStr === '4' ||
-    roleStr.includes('admin') ||
-    roleStr.includes('owner')
-  );
+  if (!user || user.role === undefined || user.role === null) return false;
+  const roleStr = String(user.role).trim().toLowerCase();
+  
+  // If role is 1 or 'user', it is a standard User
+  if (roleStr === '1' || roleStr === 'user') {
+    return false;
+  }
+  
+  // If role is NOT 1 (e.g. 2 = Moderator, 3 = Admin, 4 = SuperAdmin), return true
+  return true;
 }
 
 

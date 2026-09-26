@@ -102,6 +102,7 @@ function AuthCallbackContent() {
 
             if (mounted) {
               setAuth(authRes.user, authRes.tokens.accessToken);
+              // If role is NOT 1 (User) e.g. Moderator (2), Admin (3), SuperAdmin (4), redirect to dashboard
               if (isAdminUser(authRes.user)) {
                 setStep('complete');
                 router.push('/admin/dashboard');
@@ -131,6 +132,7 @@ function AuthCallbackContent() {
           setLoading(false);
           setStep('basic_info');
         }
+
 
       } catch (err) {
         setLoading(false);
