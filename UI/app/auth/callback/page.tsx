@@ -38,13 +38,28 @@ function AuthCallbackContent() {
   useEffect(() => {
     async function handleAuthCallback() {
       try {
+        // 1. Check existing Auth Store user first
+        const existingUser = useAuthStore.getState().user;
+        if (
+          existingUser &&
+          (existingUser.role === 'Admin' ||
+            existingUser.role === 'SuperAdmin' ||
+            existingUser.email.toLowerCase().includes('zentroax') ||
+            existingUser.email.toLowerCase().includes('admin'))
+        ) {
+          setStep('complete');
+          router.push('/admin/dashboard');
+          return;
+        }
+
+        // 2. Fetch active session from Supabase
         const { data: { session }, error } = await supabase.auth.getSession();
 
         let email = session?.user?.email || '';
         let name = session?.user?.user_metadata?.full_name || session?.user?.user_metadata?.name || '';
         let avatar = session?.user?.user_metadata?.avatar_url || session?.user?.user_metadata?.picture || '';
 
-        // Fallback hash check if session is processing
+        // Fallback hash check if session is processing in URL hash
         if (!email && typeof window !== 'undefined' && window.location.hash) {
           const params = new URLSearchParams(window.location.hash.substring(1));
           const token = params.get('access_token');
@@ -56,19 +71,18 @@ function AuthCallbackContent() {
           }
         }
 
-        // If no active session found (e.g. direct access or local test redirect)
-        if (!email) {
-          email = localStorage.getItem('last_google_auth_email') || '';
-          name = session?.user?.user_metadata?.full_name || session?.user?.user_metadata?.name || '';
-          avatar = session?.user?.user_metadata?.avatar_url || '';
+        // Check if last google auth email was admin
+        const lastAuthEmail = typeof window !== 'undefined' ? localStorage.getItem('last_google_auth_email') || '' : '';
+        if (!email && lastAuthEmail) {
+          email = lastAuthEmail;
         }
 
-        setGoogleUserEmail(email);
-        setGoogleAvatar(avatar);
-        setFullName(name);
-
         const userRole = session?.user?.app_metadata?.role || session?.user?.user_metadata?.role;
-        const isAdmin = userRole === 'Admin' || userRole === 'SuperAdmin' || email.toLowerCase().includes('admin') || email.toLowerCase().includes('zentroax');
+        const isAdmin =
+          userRole === 'Admin' ||
+          userRole === 'SuperAdmin' ||
+          email.toLowerCase().includes('admin') ||
+          email.toLowerCase().includes('zentroax');
 
         if (isAdmin) {
           const adminUser = {
@@ -88,13 +102,21 @@ function AuthCallbackContent() {
           setAuth(adminUser, token);
           setStep('complete');
 
-          setTimeout(() => {
-            router.push('/admin/dashboard');
-          }, 600);
-        } else {
-          setLoading(false);
-          setStep('basic_info');
+          router.push('/admin/dashboard');
+          return;
         }
+
+        if (!email) {
+          // If no session found and not admin, redirect to login page
+          router.push('/login');
+          return;
+        }
+
+        setGoogleUserEmail(email);
+        setGoogleAvatar(avatar);
+        setFullName(name);
+        setLoading(false);
+        setStep('basic_info');
       } catch (err) {
         setLoading(false);
         setStep('basic_info');
