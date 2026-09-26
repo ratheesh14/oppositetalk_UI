@@ -27,3 +27,11 @@ export async function signInWithGoogleReal() {
     window.location.href = directAuthUrl;
   }
 }
+
+export async function signOutUserReal() {
+  try {
+    await supabase.auth.signOut();
+  } catch (err) {
+    console.error('Supabase signout error:', err);
+  }
+}

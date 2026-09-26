@@ -36,6 +36,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     if (typeof window !== 'undefined') {
       localStorage.removeItem('oppositetalk_token');
       localStorage.removeItem('oppositetalk_user');
+      localStorage.removeItem('last_google_auth_email');
+      localStorage.removeItem('sb-uqddffqzhbbzmnaikayl-auth-token');
     }
     set({ user: null, token: null, isAuthenticated: false, isLoading: false });
   },
