@@ -52,11 +52,11 @@ function AuthCallbackContent() {
           }
         }
 
-        // If no active session found (e.g. mock or local test redirect)
+        // If no active session found (e.g. direct access or local test redirect)
         if (!email) {
-          email = localStorage.getItem('last_google_auth_email') || 'alex.morgan@gmail.com';
-          name = 'Alex Morgan';
-          avatar = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150';
+          email = localStorage.getItem('last_google_auth_email') || '';
+          name = session?.user?.user_metadata?.full_name || session?.user?.user_metadata?.name || '';
+          avatar = session?.user?.user_metadata?.avatar_url || '';
         }
 
         setGoogleUserEmail(email);
@@ -204,7 +204,7 @@ function AuthCallbackContent() {
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  placeholder="e.g. Alex Morgan"
+                  placeholder="Enter your full name"
                   className="w-full rounded-xl bg-purple-950/80 border border-purple-700/60 px-4 py-3 text-sm text-white placeholder-purple-400/50 focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
                 />
               </div>

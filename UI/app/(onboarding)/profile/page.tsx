@@ -46,11 +46,11 @@ export default function ProfileWizardPage() {
   // Sync user details from auth store on initial load if available
   React.useEffect(() => {
     if (user) {
-      const userFullName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Ratheesh';
+      const userFullName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
       
       const currentBasicInfo = draftProfile.basicInfo;
-      const needsNameUpdate = !currentBasicInfo?.displayName || currentBasicInfo.displayName === 'Alex Morgan';
-      const needsAgeUpdate = !currentBasicInfo?.age || currentBasicInfo.age === 28;
+      const needsNameUpdate = !currentBasicInfo?.displayName && userFullName;
+      const needsAgeUpdate = !currentBasicInfo?.age && user.age;
       const needsBioUpdate = !currentBasicInfo?.bio;
 
       if (needsNameUpdate || needsAgeUpdate || needsBioUpdate) {
@@ -68,7 +68,7 @@ export default function ProfileWizardPage() {
   }, [user]);
 
   const handleAutoGenerateBio = () => {
-    const name = draftProfile.basicInfo?.displayName || user?.firstName || 'Ratheesh';
+    const name = draftProfile.basicInfo?.displayName || user?.firstName || '';
     const age = draftProfile.basicInfo?.age || user?.age || 29;
     const profession = draftProfile.profession?.title || 'Senior Software Engineer';
     const industry = draftProfile.profession?.industry || 'Technology';
