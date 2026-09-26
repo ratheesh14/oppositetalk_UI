@@ -79,8 +79,8 @@ export const Footer: React.FC = () => {
         </div>
 
         <div className="mt-10 pt-8 border-t border-purple-900/40 flex flex-col sm:flex-row justify-between items-center text-xs text-purple-400/60">
-          <p>© {new Date().getFullYear()} OppositeTalk UI. All rights reserved.</p>
-          <p className="mt-2 sm:mt-0">Sleek Futuristic Design • Next.js & TypeScript</p>
+          <p>© {new Date().getFullYear()} OppositeTalk. All rights reserved.</p>
+          <p className="mt-2 sm:mt-0 font-semibold text-purple-300">Powered by Zentroax</p>
         </div>
       </div>
     </footer>
