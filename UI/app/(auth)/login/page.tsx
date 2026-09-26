@@ -50,17 +50,9 @@ export default function LoginPage() {
     setErrorMessage('');
     try {
       const response = await authService.login(data);
-
-      const isUserAdmin = isAdminUser(response.user) || isAdminUser({ email: data.email });
-      if (isUserAdmin) {
-        response.user.role = 'SuperAdmin';
-        response.user.isEligible = true;
-        response.user.isProfileComplete = true;
-      }
-
       setAuth(response.user, response.tokens.accessToken);
 
-      if (isUserAdmin) {
+      if (isAdminUser(response.user)) {
         router.push('/admin/dashboard');
       } else if (!response.user.isEligible) {
         router.push('/eligibility');
@@ -75,6 +67,7 @@ export default function LoginPage() {
       setIsLoading(false);
     }
   };
+
 
 
 

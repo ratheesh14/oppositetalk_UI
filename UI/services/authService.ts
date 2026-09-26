@@ -2,7 +2,46 @@ import { AuthResponse, User } from '@/types/user';
 import { LoginFormData, RegisterFormData } from '@/schemas/authSchema';
 import { apiRequest } from '@/lib/apiClient';
 
+export interface GoogleAuthPayload {
+  email: string;
+  firstName: string;
+  lastName: string;
+  avatarUrl?: string;
+  age?: number;
+  gender?: string;
+}
+
 export const authService = {
+  async googleAuth(data: GoogleAuthPayload): Promise<AuthResponse> {
+    try {
+      return await apiRequest<AuthResponse>('/auth/google', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    } catch {
+      const mockUser: User = {
+        id: `usr_${Date.now()}`,
+        email: data.email,
+        firstName: data.firstName || 'User',
+        lastName: data.lastName || '',
+        role: 'User',
+        isEligible: true,
+        isProfileComplete: true,
+        verificationStatus: 'Verified',
+        avatarUrl: data.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+        createdAt: new Date().toISOString(),
+      };
+      return {
+        user: mockUser,
+        tokens: {
+          accessToken: 'mock_jwt_token_' + Date.now(),
+          refreshToken: 'mock_refresh_token_' + Date.now(),
+          expiresIn: 3600,
+        },
+      };
+    }
+  },
+
   async login(data: LoginFormData): Promise<AuthResponse> {
     try {
       return await apiRequest<AuthResponse>('/auth/login', {
@@ -10,19 +49,12 @@ export const authService = {
         body: JSON.stringify(data),
       });
     } catch {
-      const emailLower = (data.email || '').toLowerCase();
-      const isAdminOrOwner =
-        emailLower.includes('admin') ||
-        emailLower.includes('zentroax') ||
-        emailLower.includes('owner');
-
-      // Mock successful login response for demo
       const mockUser: User = {
-        id: isAdminOrOwner ? 'usr_admin_123' : 'user_123',
+        id: 'user_123',
         email: data.email,
-        firstName: isAdminOrOwner ? 'Zentroax' : 'Alex',
-        lastName: isAdminOrOwner ? 'Owner' : 'Morgan',
-        role: isAdminOrOwner ? 'SuperAdmin' : 'User',
+        firstName: 'Alex',
+        lastName: 'Morgan',
+        role: 'User',
         isEligible: true,
         isProfileComplete: true,
         verificationStatus: 'Verified',
@@ -40,6 +72,7 @@ export const authService = {
       };
     }
   },
+
 
   async register(data: RegisterFormData): Promise<{ user: User; requireVerification: boolean }> {
     try {

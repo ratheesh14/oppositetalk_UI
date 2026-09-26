@@ -31,7 +31,6 @@ export function formatTimeAgo(dateString?: string): string {
 export function isAdminUser(user?: { role?: string | number; email?: string } | null): boolean {
   if (!user) return false;
   const roleStr = String(user.role ?? '').toLowerCase();
-  const emailStr = String(user.email ?? '').toLowerCase();
   return (
     roleStr === 'admin' ||
     roleStr === 'superadmin' ||
@@ -39,11 +38,9 @@ export function isAdminUser(user?: { role?: string | number; email?: string } | 
     roleStr === '3' ||
     roleStr === '4' ||
     roleStr.includes('admin') ||
-    roleStr.includes('owner') ||
-    emailStr.includes('zentroax') ||
-    emailStr.includes('admin') ||
-    emailStr.includes('owner')
+    roleStr.includes('owner')
   );
 }
+
 
 

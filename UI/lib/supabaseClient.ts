@@ -10,10 +10,6 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 export async function signInWithGoogleReal() {
   const redirectUrl = `${window.location.origin}/auth/callback`;
 
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('last_google_auth_email', 'info.zentroax@zentroax.com');
-  }
-
   try {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -27,7 +23,7 @@ export async function signInWithGoogleReal() {
     });
 
     if (error) {
-      console.warn('[Supabase OAuth Warning]:', error.message || error);
+      console.warn('[Supabase OAuth Error]:', error.message || error);
       window.location.href = redirectUrl;
     }
   } catch (err) {
@@ -35,6 +31,7 @@ export async function signInWithGoogleReal() {
     window.location.href = redirectUrl;
   }
 }
+
 
 
 export async function signOutUserReal() {

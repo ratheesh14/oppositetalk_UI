@@ -28,8 +28,6 @@ public class AuthService
         var email = request.Email.Trim().ToLowerInvariant();
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == email);
 
-        bool isAdminEmail = email == "info.zentroax@zentroax.com";
-
         if (user == null)
         {
             user = new User
@@ -39,16 +37,16 @@ public class AuthService
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 AvatarUrl = request.AvatarUrl,
-                Role = isAdminEmail ? UserRole.SuperAdmin : UserRole.User,
-                IsEligible = isAdminEmail ? true : true,
-                IsProfileComplete = isAdminEmail ? true : false,
+                Role = UserRole.User,
+                IsEligible = true,
+                IsProfileComplete = false,
                 VerificationStatus = VerificationStatus.Verified
             };
 
             _db.Users.Add(user);
             await _db.SaveChangesAsync();
 
-            if (!isAdminEmail && (request.Age.HasValue || !string.IsNullOrEmpty(request.Gender)))
+            if (request.Age.HasValue || !string.IsNullOrEmpty(request.Gender))
             {
                 var profile = new UserProfile
                 {
@@ -78,14 +76,6 @@ public class AuthService
                 await _db.SaveChangesAsync();
             }
         }
-        else if (isAdminEmail && user.Role != UserRole.SuperAdmin)
-        {
-            user.Role = UserRole.SuperAdmin;
-            user.IsEligible = true;
-            user.IsProfileComplete = true;
-            user.VerificationStatus = VerificationStatus.Verified;
-            await _db.SaveChangesAsync();
-        }
 
         var token = _jwt.GenerateAccessToken(user);
         var refresh = _jwt.GenerateRefreshToken();
@@ -108,16 +98,6 @@ public class AuthService
             return ApiResponse<AuthResult>.Fail("INVALID_CREDENTIALS", "Invalid email or password.");
         }
 
-        bool isAdminOrOwner = email == "info.zentroax@zentroax.com" || email.Contains("admin") || email.Contains("zentroax") || email.Contains("owner");
-        if (isAdminOrOwner && user.Role != UserRole.SuperAdmin)
-        {
-            user.Role = UserRole.SuperAdmin;
-            user.IsEligible = true;
-            user.IsProfileComplete = true;
-            user.VerificationStatus = VerificationStatus.Verified;
-            await _db.SaveChangesAsync();
-        }
-
         var token = _jwt.GenerateAccessToken(user);
         var refresh = _jwt.GenerateRefreshToken();
 
@@ -130,10 +110,9 @@ public class AuthService
         return ApiResponse<AuthResult>.Ok(new AuthResult(userDto, token, refresh));
     }
 
-
     public async Task<ApiResponse<AuthResult>> RegisterAsync(RegisterRequest request)
     {
-        var exists = await _db.Users.AnyAsync(u => u.Email == request.Email);
+        var exists = await _db.Users.AnyAsync(u => u.Email.ToLower() == request.Email.Trim().ToLower());
         if (exists)
         {
             return ApiResponse<AuthResult>.Fail("USER_EXISTS", "A user with this email already exists.");
@@ -145,7 +124,7 @@ public class AuthService
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
             FirstName = request.FirstName,
             LastName = request.LastName,
-            Role = request.Email.Trim().ToLower() == "info.zentroax@zentroax.com" ? UserRole.SuperAdmin : UserRole.User,
+            Role = UserRole.User,
             IsEligible = false,
             IsProfileComplete = false,
             VerificationStatus = VerificationStatus.Unverified
@@ -165,4 +144,5 @@ public class AuthService
 
         return ApiResponse<AuthResult>.Ok(new AuthResult(userDto, token, refresh));
     }
+
 }

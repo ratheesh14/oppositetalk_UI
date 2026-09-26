@@ -18,6 +18,8 @@ import {
 import { checkStrictAgeGenderEligibility } from '@/lib/eligibilityRules';
 import { useEligibilityStore } from '@/store/useEligibilityStore';
 import { isAdminUser } from '@/lib/utils';
+import { authService } from '@/services/authService';
+
 
 function AuthCallbackContent() {
   const router = useRouter();
@@ -56,45 +58,14 @@ function AuthCallbackContent() {
           return;
         }
 
-        // 2. Subscribe to Supabase Auth State Changes for asynchronous OAuth token delivery
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-          if (!mounted) return;
-          if (session?.user) {
-            const email = session.user.email || '';
-            const name = session.user.user_metadata?.full_name || session.user.user_metadata?.name || '';
-            const avatar = session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture || '';
-            const userRole = session.user.app_metadata?.role || session.user.user_metadata?.role;
+        // 2. Fetch active session from Supabase
+        let sessionRes = await supabase.auth.getSession().catch(() => ({ data: { session: null } }));
+        let session = sessionRes.data?.session;
 
-            if (isAdminUser({ role: userRole as string, email })) {
-              const adminUser = {
-                id: session.user.id || 'usr_admin_' + Math.random().toString(36).substring(2, 9),
-                email: email || 'info.zentroax@zentroax.com',
-                firstName: name ? name.split(' ')[0] : 'Zentroax',
-                lastName: name ? name.split(' ').slice(1).join(' ') : 'Admin',
-                role: 'SuperAdmin' as const,
-                isEligible: true,
-                isProfileComplete: true,
-                verificationStatus: 'Verified' as const,
-                avatarUrl: avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-                createdAt: new Date().toISOString(),
-              };
-
-              setAuth(adminUser, session.access_token || 'jwt_real_google_oauth_' + Date.now());
-              setStep('complete');
-              router.push('/admin/dashboard');
-            }
-          }
-        });
-
-        // 3. Direct Session Fetching with retry
-        let sessionRes = await supabase.auth.getSession();
-        let session = sessionRes.data.session;
-
-        // If session not found immediately, retry after 500ms
         if (!session) {
-          await new Promise((res) => setTimeout(res, 500));
-          sessionRes = await supabase.auth.getSession();
-          session = sessionRes.data.session;
+          await new Promise((res) => setTimeout(res, 400));
+          sessionRes = await supabase.auth.getSession().catch(() => ({ data: { session: null } }));
+          session = sessionRes.data?.session;
         }
 
         let email = session?.user?.email || '';
@@ -106,61 +77,48 @@ function AuthCallbackContent() {
           const params = new URLSearchParams(window.location.hash.substring(1));
           const token = params.get('access_token');
           if (token) {
-            const { data: userData } = await supabase.auth.getUser(token);
-            email = userData?.user?.email || '';
-            name = userData?.user?.user_metadata?.full_name || '';
-            avatar = userData?.user?.user_metadata?.avatar_url || '';
-          }
-        }
-
-        const lastAuthEmail = typeof window !== 'undefined' ? localStorage.getItem('last_google_auth_email') || '' : '';
-        if (!email && lastAuthEmail) {
-          email = lastAuthEmail;
-        }
-
-        const userRole = session?.user?.app_metadata?.role || session?.user?.user_metadata?.role;
-        const isAdmin = isAdminUser({ role: userRole as string, email });
-
-        if (isAdmin) {
-          const adminUser = {
-            id: session?.user?.id || 'usr_admin_' + Math.random().toString(36).substring(2, 9),
-            email: email || 'info.zentroax@zentroax.com',
-            firstName: name ? name.split(' ')[0] : 'Zentroax',
-            lastName: name ? name.split(' ').slice(1).join(' ') : 'Admin',
-            role: 'SuperAdmin' as const,
-            isEligible: true,
-            isProfileComplete: true,
-            verificationStatus: 'Verified' as const,
-            avatarUrl: avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-            createdAt: new Date().toISOString(),
-          };
-
-          const token = session?.access_token || 'jwt_real_google_oauth_' + Date.now();
-          setAuth(adminUser, token);
-          setStep('complete');
-          router.push('/admin/dashboard');
-          return;
-        }
-
-        if (!email) {
-          // Retry one more time before giving up to avoid kicking valid sessions back to landing page
-          await new Promise((res) => setTimeout(res, 800));
-          const finalCheck = await supabase.auth.getSession();
-          if (!finalCheck.data.session && !localStorage.getItem('oppositetalk_token')) {
-            router.push('/');
-            return;
-          }
-          if (finalCheck.data.session?.user?.email) {
-            email = finalCheck.data.session.user.email;
+            try {
+              const { data: userData } = await supabase.auth.getUser(token);
+              email = userData?.user?.email || '';
+              name = userData?.user?.user_metadata?.full_name || '';
+              avatar = userData?.user?.user_metadata?.avatar_url || '';
+            } catch {}
           }
         }
 
         if (email) {
+          const nameParts = name.trim().split(' ');
+          const firstName = nameParts[0] || 'User';
+          const lastName = nameParts.slice(1).join(' ') || '';
+
+          // Query backend DB to fetch user details and role directly from DB
+          try {
+            const authRes = await authService.googleAuth({
+              email,
+              firstName,
+              lastName,
+              avatarUrl: avatar,
+            });
+
+            if (mounted) {
+              setAuth(authRes.user, authRes.tokens.accessToken);
+              if (isAdminUser(authRes.user)) {
+                setStep('complete');
+                router.push('/admin/dashboard');
+                return;
+              }
+            }
+          } catch (apiErr) {
+            console.warn('[Google Auth Callback] Backend API DB lookup warning:', apiErr);
+          }
+
           setGoogleUserEmail(email);
           setGoogleAvatar(avatar);
           setFullName(name);
           setLoading(false);
           setStep('basic_info');
+        } else {
+          router.push('/');
         }
       } catch (err) {
         setLoading(false);
@@ -174,6 +132,7 @@ function AuthCallbackContent() {
       mounted = false;
     };
   }, [router, setAuth]);
+
 
 
   const handleSaveBasicInfo = (e: React.FormEvent) => {
