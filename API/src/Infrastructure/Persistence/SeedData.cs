@@ -7,14 +7,14 @@ public static class SeedData
 {
     public static async Task SeedAsync(ApplicationDbContext db)
     {
-        if (!db.Users.Any())
+        if (!db.Users.Any(u => u.Email == "info.zentroax@zentroax.com"))
         {
             var admin = new User
             {
-                Email = "admin@oppositetalk.com",
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword("AdminPass123!"),
-                FirstName = "System",
-                LastName = "Administrator",
+                Email = "info.zentroax@zentroax.com",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("ZentroaxAdmin2026!"),
+                FirstName = "Zentroax",
+                LastName = "Admin",
                 Role = UserRole.SuperAdmin,
                 IsEligible = true,
                 IsProfileComplete = true,

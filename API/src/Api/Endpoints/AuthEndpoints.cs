@@ -8,6 +8,12 @@ public static class AuthEndpoints
     {
         var group = routes.MapGroup("/api/v1/auth").WithTags("Authentication");
 
+        group.MapPost("/google", async (GoogleAuthRequest req, AuthService authService) =>
+        {
+            var res = await authService.GoogleAuthAsync(req);
+            return res.Success ? Results.Ok(res) : Results.BadRequest(res);
+        });
+
         group.MapPost("/login", async (LoginRequest req, AuthService authService) =>
         {
             var res = await authService.LoginAsync(req);

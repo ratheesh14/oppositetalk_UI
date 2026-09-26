@@ -35,18 +35,42 @@ export default function RootLandingPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Trigger Google Auth Simulation
-  const handleGoogleSignIn = () => {
+  const handleGoogleSignIn = (selectedEmail?: string) => {
     setFlowStep('authenticating');
     setFormError('');
 
-    // Simulate Google OAuth handshake
     setTimeout(() => {
-      const mockGoogleName = 'Alex Morgan';
-      const mockGoogleEmail = 'alex.morgan@gmail.com';
-      
-      setGoogleEmail(mockGoogleEmail);
-      setFullName(mockGoogleName);
-      setFlowStep('basic_info');
+      const emailToUse = selectedEmail || 'info.zentroax@zentroax.com';
+      const isAdmin = emailToUse.trim().toLowerCase() === 'info.zentroax@zentroax.com';
+
+      setGoogleEmail(emailToUse);
+
+      if (isAdmin) {
+        const adminUser = {
+          id: 'usr_admin_zentroax',
+          email: 'info.zentroax@zentroax.com',
+          firstName: 'Zentroax',
+          lastName: 'Admin',
+          role: 'Admin' as const,
+          isEligible: true,
+          isProfileComplete: true,
+          verificationStatus: 'Verified' as const,
+          avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+          createdAt: new Date().toISOString(),
+        };
+
+        const mockToken = 'mock_jwt_admin_zentroax_token_' + Date.now();
+        setAuth(adminUser, mockToken);
+        setFlowStep('complete');
+        
+        setTimeout(() => {
+          router.push('/admin/dashboard');
+        }, 1000);
+      } else {
+        const mockGoogleName = 'Alex Morgan';
+        setFullName(mockGoogleName);
+        setFlowStep('basic_info');
+      }
     }, 1200);
   };
 
@@ -83,12 +107,14 @@ export default function RootLandingPage() {
       const firstName = nameParts[0] || 'User';
       const lastName = nameParts.slice(1).join(' ') || '';
 
+      const isAdmin = googleEmail.trim().toLowerCase() === 'info.zentroax@zentroax.com';
+
       const userObject = {
         id: 'usr_' + Math.random().toString(36).substring(2, 9),
-        email: googleEmail || 'google.user@example.com',
+        email: googleEmail || 'user@example.com',
         firstName,
         lastName,
-        role: 'User' as const,
+        role: isAdmin ? ('Admin' as const) : ('User' as const),
         isEligible: true,
         isProfileComplete: false,
         verificationStatus: 'Pending' as const,
@@ -102,9 +128,13 @@ export default function RootLandingPage() {
       setFlowStep('complete');
       setIsSubmitting(false);
 
-      // Redirect to eligibility assessment or discover feed
+      // Redirect to eligibility assessment or admin dashboard
       setTimeout(() => {
-        router.push('/eligibility');
+        if (isAdmin) {
+          router.push('/admin/dashboard');
+        } else {
+          router.push('/eligibility');
+        }
       }, 1000);
     }, 800);
   };
@@ -146,7 +176,7 @@ export default function RootLandingPage() {
 
             {/* Primary Google Auth Button */}
             <button
-              onClick={handleGoogleSignIn}
+              onClick={() => handleGoogleSignIn()}
               disabled={flowStep === 'authenticating'}
               className="w-full flex items-center justify-center gap-3 bg-white hover:bg-purple-50 text-slate-900 font-bold py-4 px-6 rounded-2xl transition-all duration-300 shadow-[0_0_25px_rgba(255,255,255,0.25)] hover:shadow-[0_0_35px_rgba(232,121,249,0.5)] border border-purple-200 active:scale-[0.98] group cursor-pointer"
             >
@@ -172,12 +202,17 @@ export default function RootLandingPage() {
               <ArrowRight className="w-4 h-4 ml-auto text-purple-600 group-hover:translate-x-1 transition-transform" />
             </button>
 
-            {/* Alternative Email Link */}
-            <div className="mt-5 text-xs text-purple-300/60 flex items-center justify-center gap-2">
-              <span>Prefer email password?</span>
-              <Link href="/login" className="text-fuchsia-300 font-semibold hover:underline">
-                Sign In with Email
-              </Link>
+            {/* Quick Admin Sign-In Link */}
+            <div className="mt-5 pt-4 border-t border-purple-900/60 flex flex-col items-center gap-2 text-xs">
+              <span className="text-purple-300/60">Platform Administrator?</span>
+              <button
+                type="button"
+                onClick={() => handleGoogleSignIn('info.zentroax@zentroax.com')}
+                className="text-fuchsia-300 font-bold hover:underline flex items-center gap-1.5"
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+                Sign In as Admin (info.zentroax@zentroax.com)
+              </button>
             </div>
           </div>
         </div>
