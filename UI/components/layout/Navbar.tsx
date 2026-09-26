@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -23,8 +23,15 @@ import {
 
 export const Navbar: React.FC = () => {
   const pathname = usePathname();
+  const router = useRouter();
   const { user, isAuthenticated, logout } = useAuthStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    setMobileMenuOpen(false);
+    router.push('/');
+  };
 
   const isAdminPage = pathname.startsWith('/admin');
 
@@ -136,7 +143,7 @@ export const Navbar: React.FC = () => {
                 <span className="text-xs font-bold text-white">{user?.firstName}</span>
               </Link>
               <button
-                onClick={logout}
+                onClick={handleLogout}
                 title="Log out"
                 className="p-2 text-purple-400 hover:text-purple-200 transition cursor-pointer"
               >
@@ -191,7 +198,7 @@ export const Navbar: React.FC = () => {
               </Link>
               <div className="pt-3 border-t border-purple-900/60 flex justify-between items-center">
                 <span className="text-xs text-purple-400">Signed in as {user?.email}</span>
-                <Button variant="outline" size="sm" onClick={logout}>
+                <Button variant="outline" size="sm" onClick={handleLogout}>
                   Log Out
                 </Button>
               </div>
