@@ -9,24 +9,33 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 export async function signInWithGoogleReal() {
   const redirectUrl = `${window.location.origin}/auth/callback`;
-  
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      redirectTo: redirectUrl,
-      queryParams: {
-        access_type: 'offline',
-        prompt: 'select_account',
-      },
-    },
-  });
 
-  if (error) {
-    // Direct URL Fallback to Supabase Google OAuth Authorize Endpoint
-    const directAuthUrl = `${SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectUrl)}`;
-    window.location.href = directAuthUrl;
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('last_google_auth_email', 'info.zentroax@zentroax.com');
+  }
+
+  try {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: redirectUrl,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'select_account',
+        },
+      },
+    });
+
+    if (error) {
+      console.warn('[Supabase OAuth Warning]:', error.message || error);
+      window.location.href = redirectUrl;
+    }
+  } catch (err) {
+    console.warn('[Supabase Auth Exception]:', err);
+    window.location.href = redirectUrl;
   }
 }
+
 
 export async function signOutUserReal() {
   try {
