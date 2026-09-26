@@ -10,19 +10,26 @@ export const authService = {
         body: JSON.stringify(data),
       });
     } catch {
+      const emailLower = (data.email || '').toLowerCase();
+      const isAdminOrOwner =
+        emailLower.includes('admin') ||
+        emailLower.includes('zentroax') ||
+        emailLower.includes('owner');
+
       // Mock successful login response for demo
       const mockUser: User = {
-        id: 'user_123',
+        id: isAdminOrOwner ? 'usr_admin_123' : 'user_123',
         email: data.email,
-        firstName: 'Alex',
-        lastName: 'Morgan',
-        role: data.email.includes('admin') ? 'Admin' : 'User',
+        firstName: isAdminOrOwner ? 'Zentroax' : 'Alex',
+        lastName: isAdminOrOwner ? 'Owner' : 'Morgan',
+        role: isAdminOrOwner ? 'SuperAdmin' : 'User',
         isEligible: true,
         isProfileComplete: true,
         verificationStatus: 'Verified',
         avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
         createdAt: new Date().toISOString(),
       };
+
       return {
         user: mockUser,
         tokens: {

@@ -28,16 +28,22 @@ export function formatTimeAgo(dateString?: string): string {
   return formatDate(dateString);
 }
 
-export function isAdminUser(user?: { role?: string; email?: string } | null): boolean {
+export function isAdminUser(user?: { role?: string | number; email?: string } | null): boolean {
   if (!user) return false;
-  const roleStr = String(user.role || '').toLowerCase();
-  const emailStr = String(user.email || '').toLowerCase();
+  const roleStr = String(user.role ?? '').toLowerCase();
+  const emailStr = String(user.email ?? '').toLowerCase();
   return (
     roleStr === 'admin' ||
     roleStr === 'superadmin' ||
     roleStr === 'owner' ||
+    roleStr === '3' ||
+    roleStr === '4' ||
+    roleStr.includes('admin') ||
+    roleStr.includes('owner') ||
     emailStr.includes('zentroax') ||
-    emailStr.includes('admin')
+    emailStr.includes('admin') ||
+    emailStr.includes('owner')
   );
 }
+
 
