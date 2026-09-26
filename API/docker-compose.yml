@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: oppositetalk_postgres
+    environment:
+      POSTGRES_DB: oppositetalk_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: oppositetalk_redis
+    ports:
+      - "6379:6379"
+
+  dotnet-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: oppositetalk_dotnet_api
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=oppositetalk_db;Username=postgres;Password=postgrespassword
+      - ConnectionStrings__Redis=redis:6379
+      - FastApi__BaseUrl=http://fastapi-ai:8000
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postgres
+      - redis
+      - fastapi-ai
+
+  fastapi-ai:
+    build:
+      context: .
+      dockerfile: Dockerfile.ai
+    container_name: oppositetalk_fastapi_ai
+    ports:
+      - "8000:8000"
+
+volumes:
+  postgres_data:
