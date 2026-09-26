@@ -22,7 +22,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // 1. Add DbContext
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
-    ?? "Host=localhost;Database=oppositetalk_db;Username=postgres;Password=postgres";
+    ?? "Host=db.uqddffqzhbbzmnaikayl.supabase.co;Port=5432;Database=postgres;Username=postgres;Password=[YOUR-PASSWORD];SSL Mode=Require;Trust Server Certificate=true";
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
